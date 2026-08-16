@@ -40,31 +40,31 @@ Le projet repose sur une architecture MVC stricte garantissant séparation des r
 
 
 **Interface d'Authentification**
-<img width="1271" height="639" alt="image" src="https://github.com/user-attachments/assets/82ee89c4-45b5-4437-bd5e-53c814b7e388" />
+<img width="1271" height="639" alt="image" src="https://github.com/user-attachments/assets/a1068fcb-47f7-41e5-99a9-e80f1020e7fc" />
 
 
 **Tableau de Bord Principal**
-<img width="1275" height="643" alt="image" src="https://github.com/user-attachments/assets/757bf5ec-593f-4147-8eb2-9a8d6f61da2c" />
+<img width="1275" height="643" alt="image" src="https://github.com/user-attachments/assets/ea5d66ea-d304-4cdd-b201-d69ae027cb2c" />
 
 
 **Gestion des Dossiers et Vues Détaillées**
-<img width="1276" height="618" alt="image" src="https://github.com/user-attachments/assets/80f3fb71-5928-49ea-b190-928447b44d80" />
+<img width="1276" height="618" alt="image" src="https://github.com/user-attachments/assets/4d6f7315-e9ba-4032-996f-fe517470c742" />
 
-<img width="1271" height="614" alt="image" src="https://github.com/user-attachments/assets/d1e43bee-c48d-47d6-b87c-75c05e245c92" />
+<img width="1271" height="614" alt="image" src="https://github.com/user-attachments/assets/977bfa42-92ac-43b1-a5c0-1f3d9b44f942" />
 
 **Saisie des Entrées de Temps**
-<img width="1277" height="617" alt="image" src="https://github.com/user-attachments/assets/c3031232-2b0a-4207-8ead-0907b7bbcde8" />
+<img width="1277" height="617" alt="image" src="https://github.com/user-attachments/assets/e6b41b18-9270-4c16-a772-d75a26a1c1a8" />
 
 
 **Facturation et Rendu PDF**
-<img width="1274" height="613" alt="image" src="https://github.com/user-attachments/assets/469a83d6-004a-41f3-9c0f-87bf0b5d6af9" />
+<img width="1274" height="613" alt="image" src="https://github.com/user-attachments/assets/71b4f532-5628-4308-8f9f-b2750b6ded9b" />
 
 
 **Calendrier des Rendez-vous**
 
-<img width="1276" height="613" alt="image" src="https://github.com/user-attachments/assets/0018436b-33d1-4e4e-81f0-314f18cd98f2" />
+<img width="1276" height="613" alt="image" src="https://github.com/user-attachments/assets/e3eac871-cfa6-453a-aa13-ed88a847c977" />
 
-<img width="1269" height="613" alt="image" src="https://github.com/user-attachments/assets/405b1ce7-f2f5-4b7f-8302-8828683a7bd1" />
+<img width="1269" height="613" alt="image" src="https://github.com/user-attachments/assets/5a4fba70-3179-439d-a0b3-ebb91cd99bf7" />
 
 ## 🛡️ Sécurité
 
