@@ -1,0 +1,150 @@
+{% extends 'baseauth.html.twig' %}
+
+{% block title %}Inscription - LexPro{% endblock %}
+
+{% block body %}
+<div class="auth-wrapper">
+    {# Left Side - Branding #}
+    <div class="auth-branding auth-branding--register">
+        <div class="auth-branding-content">
+            <div class="auth-branding-inner">
+                <div class="auth-logo-wrapper mb-4">
+                    <div class="auth-logo-icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                </div>
+                <h1 class="auth-brand-title">Rejoignez LexPro</h1>
+                <p class="auth-brand-subtitle">Créez votre compte et commencez à gérer vos dossiers juridiques</p>
+
+                <div class="auth-features auth-features--grid">
+                    <div class="auth-feature-card">
+                        <div class="auth-feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <span>Sécurisé</span>
+                    </div>
+                    <div class="auth-feature-card">
+                        <div class="auth-feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <span>Efficace</span>
+                    </div>
+                    <div class="auth-feature-card">
+                        <div class="auth-feature-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <span>24/7</span>
+                    </div>
+                    <div class="auth-feature-card">
+                        <div class="auth-feature-icon">
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <span>Premium</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-branding-footer">
+                <small class="opacity-75">© 2026 LexPro — Gestion Juridique</small>
+            </div>
+        </div>
+    </div>
+
+    {# Right Side - Registration Form #}
+    <div class="auth-form-side">
+        <div class="auth-form-container">
+            {# Header #}
+            <div class="text-center mb-5">
+                <div class="auth-form-icon bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <h2 class="fw-bold text-dark mb-2 mt-4">Créer un compte</h2>
+                <p class="text-muted">Rejoignez la communauté LexPro</p>
+            </div>
+
+            {# Registration Form #}
+            <div class="auth-card animate-slide-up">
+                <div class="auth-card-body">
+                    {{ form_start(registrationForm, {'attr': {'class': 'auth-form'}}) }}
+
+                    {# Email Field #}
+                    <div class="auth-field mb-4">
+                        <label for="{{ registrationForm.email.vars.id }}" class="auth-label">
+                            <i class="bi bi-envelope me-2"></i>Adresse email
+                        </label>
+                        {{ form_widget(registrationForm.email, {
+                            'attr': {
+                                'class': 'auth-input',
+                                'placeholder': 'votre@email.com'
+                            }
+                        }) }}
+                        <div class="auth-field-error">
+                            {{ form_errors(registrationForm.email) }}
+                        </div>
+                    </div>
+
+                    {# Password Field #}
+                    <div class="auth-field mb-4">
+                        <label for="{{ registrationForm.plainPassword.first.vars.id }}" class="auth-label">
+                            <i class="bi bi-lock me-2"></i>Mot de passe
+                        </label>
+                        {{ form_widget(registrationForm.plainPassword.first, {
+                            'attr': {
+                                'class': 'auth-input',
+                                'placeholder': '••••••••'
+                            }
+                        }) }}
+                        <div class="auth-field-error">
+                            {{ form_errors(registrationForm.plainPassword.first) }}
+                        </div>
+                    </div>
+
+                    {# Confirm Password Field #}
+                    <div class="auth-field mb-4">
+                        <label for="{{ registrationForm.plainPassword.second.vars.id }}" class="auth-label">
+                            <i class="bi bi-lock-fill me-2"></i>Confirmer le mot de passe
+                        </label>
+                        {{ form_widget(registrationForm.plainPassword.second, {
+                            'attr': {
+                                'class': 'auth-input',
+                                'placeholder': '••••••••'
+                            }
+                        }) }}
+                        <div class="auth-field-error">
+                            {{ form_errors(registrationForm.plainPassword.second) }}
+                        </div>
+                    </div>
+
+                    {# Register Button #}
+                    <button type="submit" class="btn btn-success btn-lg w-100 auth-submit-btn">
+                        <i class="bi bi-person-plus me-2"></i>Créer mon compte
+                    </button>
+
+                    {{ form_end(registrationForm) }}
+
+                    {# Divider #}
+                    <div class="auth-divider">
+                        <span>ou</span>
+                    </div>
+
+                    {# Login Link #}
+                    <div class="text-center">
+                        <p class="text-muted mb-3">Déjà un compte ?</p>
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-lg w-100 auth-alt-btn">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Se connecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# Terms #}
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    En créant un compte, vous acceptez nos
+                    <a href="#" class="text-decoration-none text-primary fw-semibold">Conditions d'utilisation</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

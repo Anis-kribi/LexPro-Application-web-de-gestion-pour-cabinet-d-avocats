@@ -1,0 +1,134 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Documents — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-file-earmark-text fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Documents</h1>
+                <p class="text-muted mb-0">Gestion et stockage des fichiers liés aux dossiers</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+        <a href="{{ path('app_document_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-upload me-2"></i>Uploader Document
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold">Tous les documents</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Fichier</th>
+                        <th>Dossier Lié</th>
+                        <th>Type</th>
+                        <th>Uploadé par</th>
+                        <th>Date</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for document in documents %}
+                    {% set ext = document.extension %}
+                    {% set icon = 'file-earmark' %}
+                    {% set iconCol = 'secondary' %}
+                    {% if ext == 'pdf' %}{% set icon = 'file-earmark-pdf-fill' %}{% set iconCol = 'danger' %}
+                    {% elseif ext in ['doc', 'docx'] %}{% set icon = 'file-earmark-word-fill' %}{% set iconCol = 'primary' %}
+                    {% elseif ext in ['jpg', 'jpeg', 'png'] %}{% set icon = 'file-earmark-image-fill' %}{% set iconCol = 'success' %}
+                    {% elseif ext in ['xls', 'xlsx'] %}{% set icon = 'file-earmark-excel-fill' %}{% set iconCol = 'success' %}
+                    {% endif %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm bg-{{ iconCol }} bg-opacity-10 text-{{ iconCol }} me-3">
+                                    <i class="bi bi-{{ icon }}"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold text-dark">{{ document.titre }}</span>
+                                    {% if document.nomOriginal %}
+                                    <div class="small text-muted">{{ document.nomOriginal }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_dossier_show', {'id': document.dossier.id}) }}" class="fw-semibold text-decoration-none">
+                                <i class="bi bi-folder2 text-warning me-1"></i>{{ document.dossier.numeroReference }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ document.type }}</span>
+                        </td>
+                        <td>
+                            {% if document.telechargepar %}
+                            <div class="small fw-semibold"><i class="bi bi-person me-1"></i>{{ document.telechargepar.fullName }}</div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="small text-muted"><i class="bi bi-calendar me-1"></i>{{ document.createdAt ? document.createdAt|date('d/m/Y') : '' }}</span>
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_document_download', {'id': document.id}) }}" class="crud-btn crud-btn-view" title="Télécharger"><i class="bi bi-download"></i></a>
+                                <a href="{{ path('app_document_show', {'id': document.id}) }}" class="crud-btn crud-btn-edit" title="Voir"><i class="bi bi-eye"></i></a>
+                                {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+                                <a href="{{ path('app_document_edit', {'id': document.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                <form method="post" action="{{ path('app_document_delete', {'id': document.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer ce document ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                                    <button class="crud-btn crud-btn-delete" title="Supprimer"><i class="bi bi-trash"></i></button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-file-earmark-x"></i></div>
+                                <h5>Aucun document stocké</h5>
+                                <p>Commencez à uploader des fichiers liés à vos dossiers.</p>
+                                {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+                                <a href="{{ path('app_document_new') }}" class="btn btn-primary"><i class="bi bi-upload me-2"></i>Uploader</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

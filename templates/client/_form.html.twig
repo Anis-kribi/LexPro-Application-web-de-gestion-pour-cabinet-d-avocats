@@ -1,0 +1,158 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+    
+<div class="row g-4">
+    <div class="col-12">
+        <div class="form-section-title"><i class="bi bi-person-badge"></i> Identité du Client</div>
+    </div>
+
+    <div class="col-md-12 mb-2">
+        <label class="form-label fw-bold">Type de client</label>
+        <div class="d-flex gap-4 p-3 bg-light rounded text-center border">
+            {% for child in form.type %}
+                <div class="form-check form-check-inline mx-auto mb-0">
+                    {{ form_widget(child, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_label(child, null, {'label_attr': {'class': 'form-check-label fw-bold mt-1'}}) }}
+                </div>
+            {% endfor %}
+        </div>
+        {{ form_errors(form.type) }}
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.nom) }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.prenom) }}
+            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.prenom) }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.nomEntreprise) }}
+            {{ form_widget(form.nomEntreprise, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.nomEntreprise) }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.taxId) }}
+            {{ form_widget(form.taxId, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.taxId) }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="form-section-title"><i class="bi bi-geo-alt"></i> Coordonnées</div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.telephone) }}
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-telephone text-muted"></i></span>
+                {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="text-danger small mt-1">{{ form_errors(form.telephone) }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.email) }}
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="text-danger small mt-1">{{ form_errors(form.email) }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="form-group">
+            {{ form_label(form.adresse) }}
+            {{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.adresse) }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.ville) }}
+            {{ form_widget(form.ville, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.ville) }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {{ form_label(form.statuts) }}
+            {{ form_widget(form.statuts, {'attr': {'class': 'form-select'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.statuts) }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="form-section-title"><i class="bi bi-briefcase"></i> Administration</div>
+    </div>
+
+    {% if form.avocat is defined %}
+    <div class="col-md-12">
+        <div class="form-group">
+            {{ form_label(form.avocat) }}
+            {{ form_widget(form.avocat, {'attr': {'class': 'form-select select2'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.avocat) }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-12 mt-2">
+        <div class="notes-container">
+            <label class="form-label fw-bold"><i class="bi bi-sticky me-1"></i> Remarques internes</label>
+            {{ form_widget(form.remarques, {'attr': {'class': 'form-control', 'rows': '3', 'placeholder': 'Saisissez ici les notes confidentielles...'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.remarques) }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="d-flex align-items-center gap-4 p-3 bg-light border rounded">
+            {% if client is defined and client.id and client.image %}
+                <img id="avatar-preview" src="{{ asset('uploads/clients/' ~ client.image) }}" class="avatar avatar-lg shadow-sm" alt="Preview">
+            {% else %}
+                <div id="avatar-placeholder" class="avatar avatar-lg bg-white border shadow-sm text-muted"><i class="bi bi-image"></i></div>
+                <img id="avatar-preview" src="" class="avatar avatar-lg shadow-sm d-none" alt="Preview">
+            {% endif %}
+            <div class="flex-grow-1">
+                <label class="form-label fw-bold mb-1">Photo de profil</label>
+                {{ form_widget(form.image, {'attr': {'class': 'form-control form-control-sm', 'onchange': 'previewImage(this)'}}) }}
+                <div class="text-danger small mt-1">{{ form_errors(form.image) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2 border-top mt-4 pt-4">
+    <a href="{{ path('app_client_index') }}" class="btn btn-light">Annuler</a>
+    <button class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>{{ button_label|default('Enregistrer') }}</button>
+</div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('avatar-preview');
+    const placeholder = document.getElementById('avatar-placeholder');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            if(placeholder) placeholder.classList.add('d-none');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{{ form_end(form) }}

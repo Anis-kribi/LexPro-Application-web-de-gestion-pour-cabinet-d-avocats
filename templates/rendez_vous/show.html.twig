@@ -1,0 +1,61 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}{{ rendez_vou.date|date('d/m/Y') }} — RDV LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a href="{{ path('app_rendez_vous_index') }}" class="btn btn-light border me-3" title="Retour aux rendez-vous"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{{ path('app_rendez_vous_index') }}">Rendez-vous</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Détail</li>
+                    </ol>
+                </nav>
+                <h1 class="h4 mb-0 fw-bold"><i class="bi bi-calendar-check text-primary me-2"></i>Détail du Rendez-vous</h1>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_rendez_vous_edit', {'id': rendez_vou.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            <form method="post" action="{{ path('app_rendez_vous_delete', {'id': rendez_vou.id}) }}" onsubmit="return confirm('Supprimer ce RDV ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rendez_vou.id) }}">
+                <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-clock me-1"></i>Date et Heure</span>
+                    <span class="info-value text-primary fs-6">{{ rendez_vou.date ? rendez_vou.date|date('d/m/Y à H:i') : '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-person me-1"></i>Client</span>
+                    <span class="info-value">
+                        {% if rendez_vou.client %}
+                            <a href="{{ path('app_client_show', {'id': rendez_vou.client.id}) }}" class="fw-bold text-decoration-none">{{ rendez_vou.client.fullName }}</a>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-circle me-1"></i>Statut</span>
+                    <span class="info-value">
+                        {% set stClass = rendez_vou.status == 'Terminé' ? 'success' : (rendez_vou.status == 'Annulé' ? 'danger' : 'info') %}
+                        <span class="badge bg-{{ stClass == 'info' ? 'primary' : stClass }}">{{ rendez_vou.status ?? 'Planifié' }}</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

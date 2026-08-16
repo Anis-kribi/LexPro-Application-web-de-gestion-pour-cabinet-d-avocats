@@ -1,0 +1,72 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}{{ tache.titre }} — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a href="{{ path('app_tache_index') }}" class="btn btn-light border me-3" title="Retour aux tâches"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{{ path('app_tache_index') }}">Tâches</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Détail</li>
+                    </ol>
+                </nav>
+                <h1 class="h4 mb-0 fw-bold"><i class="bi bi-check2-square text-warning me-2"></i>Détail de la Tâche</h1>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_tache_edit', {'id': tache.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            <form method="post" action="{{ path('app_tache_delete', {'id': tache.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
+                <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-dark mb-4">{{ tache.titre }}</h5>
+                
+                <div class="info-row">
+                    <span class="info-label">Dossier</span>
+                    <span class="info-value text-primary"><i class="bi bi-folder2 me-1"></i><a href="{{ path('app_dossier_show', {id: tache.dossier.id}) }}">{{ tache.dossier.numeroReference }}</a></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Statut</span>
+                    <span class="info-value">
+                        {% set stClass = {'À faire': 'secondary', 'En cours': 'primary', 'Terminée': 'success', 'Annulée': 'danger'}[tache.status] ?? 'secondary' %}
+                        <span class="badge bg-{{ stClass }}">{{ tache.status }}</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Priorité</span>
+                    <span class="info-value">
+                        {% set prioClass = {'Basse': 'secondary', 'Normale': 'info', 'Haute': 'warning', 'Urgente': 'danger'}[tache.priorite] ?? 'secondary' %}
+                        <span class="badge bg-{{ prioClass }} bg-opacity-25 text-{{ prioClass }} border border-{{ prioClass }}"><i class="bi bi-flag-fill me-1"></i>{{ tache.priorite }}</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Assigné à</span>
+                    <span class="info-value">{{ tache.assigneA ? tache.assigneA.fullName : 'Non assigné' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Échéance</span>
+                    <span class="info-value {% if tache.isEnRetard and tache.status != 'Terminée' %}text-danger{% endif %}">{{ tache.dateEcheance ? tache.dateEcheance|date('d/m/Y') : '—' }}</span>
+                </div>
+            </div>
+            <div class="card-footer bg-light p-4 border-top">
+                <h6 class="text-muted fw-bold small text-uppercase mb-2"><i class="bi bi-card-text me-1"></i> Description</h6>
+                <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ tache.description ?: 'Aucune description fournie.' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

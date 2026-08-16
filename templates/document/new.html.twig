@@ -1,0 +1,46 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Uploader Document — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_document_index') }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_document_index') }}"><i class="bi bi-file-earmark-text me-1"></i>Documents</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Uploader</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Uploader un Fichier</h1>
+            <p class="text-muted">Ajoutez un document et associez-le à un dossier.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-cloud-arrow-up text-primary me-2"></i>Détails du document</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ include('document/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-cloud-arrow-up-fill"></i> Conseils d'upload</div>
+            <ul>
+                <li><i class="bi bi-check-circle"></i> Donnez un titre clair au document.</li>
+                <li><i class="bi bi-check-circle"></i> Sélectionnez le bon type et dossier associé.</li>
+                <li><i class="bi bi-check-circle"></i> Définissez le niveau de confidentialité approprié.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

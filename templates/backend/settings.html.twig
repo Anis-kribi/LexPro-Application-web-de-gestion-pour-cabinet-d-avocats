@@ -1,0 +1,179 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}{{ 'settings.page_title'|trans }} - LexPro{% endblock %}
+{% block page_title %}{{ 'settings.page_title'|trans }}{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush border-0" id="settings-nav" role="tablist">
+                    <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 active py-3 border-0 rounded-top" id="appearance-tab" data-bs-toggle="list" href="#appearance" role="tab">
+                        <i class="bi bi-palette fs-5 text-primary"></i> <span class="fw-semibold">{{ 'settings.appearance'|trans }}</span>
+                    </a>
+                    <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-0" id="preferences-tab" data-bs-toggle="list" href="#preferences" role="tab">
+                        <i class="bi bi-person-gear fs-5 text-success"></i> <span class="fw-semibold">{{ 'settings.profile_prefs'|trans }}</span>
+                    </a>
+                    <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-0 rounded-bottom" id="notifications-tab" data-bs-toggle="list" href="#notifications" role="tab">
+                        <i class="bi bi-bell fs-5 text-warning"></i> <span class="fw-semibold">{{ 'settings.notifications_tab'|trans }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="tab-content" id="nav-tabContent">
+            <!-- Apparence -->
+            <div class="tab-pane fade show active" id="appearance" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom pt-4 pb-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-palette me-2 text-primary"></i>{{ 'settings.appearance_title'|trans }}</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row gx-5">
+                            <div class="col-lg-6 mb-4">
+                                <h6 class="fw-bold mb-3">{{ 'settings.theme_title'|trans }}</h6>
+                                <p class="text-muted small mb-3">{{ 'settings.theme_desc'|trans }}</p>
+                                <div class="form-check form-switch form-control-lg px-0 mb-0 d-flex align-items-center gap-3">
+                                    <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="darkModeSwitchSettings" style="transform: scale(1.5);">
+                                    <label class="form-check-label ms-3 fw-medium" for="darkModeSwitchSettings" id="darkModeLabelSettings">{{ 'settings.theme_off'|trans }}</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <h6 class="fw-bold mb-3">{{ 'settings.layout_title'|trans }}</h6>
+                                <p class="text-muted small mb-3">{{ 'settings.layout_desc'|trans }}</p>
+                                <div class="form-check form-switch px-0 mb-0 d-flex align-items-center gap-3">
+                                    <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="sidebarCollapseSwitch" style="transform: scale(1.5);">
+                                    <label class="form-check-label ms-3 fw-medium" for="sidebarCollapseSwitch">{{ 'settings.layout_switch'|trans }}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profil & Préférences -->
+            <div class="tab-pane fade" id="preferences" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom pt-4 pb-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-person-gear me-2 text-success"></i>{{ 'settings.my_account'|trans }}</h5>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <img src="{{ app.user.image ? asset('uploads/users/' ~ app.user.image) : 'https://ui-avatars.com/api/?name=' ~ (app.user.getFullName()|url_encode) }}" class="rounded-circle mb-3 shadow-sm" alt="Profile" style="width: 100px; height: 100px; object-fit: cover;">
+                        <h5 class="fw-bold">{{ app.user ? app.user.getFullName() : 'Utilisateur' }}</h5>
+                        <p class="text-muted">{{ app.user.email }}</p>
+                        <a href="{{ path('app_profile') }}" class="btn btn-outline-primary px-4 mt-2 rounded-pill"><i class="bi bi-pencil me-2"></i>{{ 'settings.edit_profile'|trans }}</a>
+                        
+                        <hr class="my-5 opacity-25">
+                        
+                        <div class="text-start">
+                            <h6 class="fw-bold mb-3">{{ 'settings.language_title'|trans }}</h6>
+                            <select class="form-select w-50" id="languageSelect">
+                                <option value="fr" {% if app.request.locale == 'fr' %}selected{% endif %}>Français (France)</option>
+                                <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>English (US)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="tab-pane fade" id="notifications" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom pt-4 pb-3">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-bell me-2 text-warning"></i>{{ 'settings.notifications_tab'|trans }} System</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">{{ 'settings.global_alerts'|trans }}</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">{{ 'settings.email_notifications'|trans }}</h6>
+                                <p class="mb-0 text-muted small">{{ 'settings.email_desc'|trans }}</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input align-middle mt-0" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">{{ 'settings.appointment_reminders'|trans }}</h6>
+                                <p class="mb-0 text-muted small">{{ 'settings.appointment_desc'|trans }}</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input align-middle mt-0" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">{{ 'settings.billing_alerts'|trans }}</h6>
+                                <p class="mb-0 text-muted small">{{ 'settings.billing_desc'|trans }}</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input align-middle mt-0" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-top">
+                            <button class="btn btn-primary"><i class="bi bi-save me-2"></i>{{ 'settings.save_changes'|trans }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sync Settings Page Switches with LocalStorage state
+    const darkModeSwitch = document.getElementById('darkModeSwitchSettings');
+    const darkModeLabel = document.getElementById('darkModeLabelSettings');
+    const sidebarCollapseSwitch = document.getElementById('sidebarCollapseSwitch');
+    const languageSelect = document.getElementById('languageSelect');
+    
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function(e) {
+            window.location.href = '/change-locale/' + e.target.value;
+        });
+    }
+
+    // Check dark mode
+    if (localStorage.getItem('theme') === 'dark') {
+        darkModeSwitch.checked = true;
+        darkModeLabel.innerText = "{{ 'settings.theme_on'|trans }}";
+    } else {
+        darkModeLabel.innerText = "{{ 'settings.theme_off'|trans }}";
+    }
+    
+    darkModeSwitch.addEventListener('change', function(e) {
+        if (e.target.checked) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            darkModeLabel.innerText = "{{ 'settings.theme_on'|trans }}";
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            darkModeLabel.innerText = "{{ 'settings.theme_off'|trans }}";
+        }
+    });
+
+    // Check sidebar
+    if (localStorage.getItem('sidebar-collapsed') === 'true') {
+        sidebarCollapseSwitch.checked = true;
+    }
+
+    sidebarCollapseSwitch.addEventListener('change', function(e) {
+        if (e.target.checked) {
+            document.body.classList.add('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', 'true');
+        } else {
+            document.body.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', 'false');
+        }
+    });
+});
+</script>
+{% endblock %}

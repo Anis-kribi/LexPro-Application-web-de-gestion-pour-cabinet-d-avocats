@@ -1,0 +1,58 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Modifier Facture — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_factures_show', {'id': facture.id}) }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_factures_index') }}"><i class="bi bi-receipt me-1"></i>Factures</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_factures_show', {'id': facture.id}) }}">{{ facture.numeroFacture }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Modifier la Facture</h1>
+            <p class="text-muted">{{ facture.client.fullName }} — {{ facture.montantTtc|number_format(2, ',', ' ') }} DT TTC</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Informations de la facture</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ include('factures/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-shield-check"></i> Facture actuelle</div>
+            <ul>
+                <li><i class="bi bi-hash"></i> N°: <strong>{{ facture.numeroFacture }}</strong></li>
+                <li><i class="bi bi-currency-euro"></i> Montant TTC: <strong>{{ facture.montantTtc|number_format(2, ',', ' ') }} DT</strong></li>
+                <li><i class="bi bi-calendar"></i> Émission: <strong>{{ facture.dateEmission|date('d/m/Y') }}</strong></li>
+                <li><i class="bi bi-circle-fill" style="font-size:.5rem;vertical-align:middle;"></i> Statut: <strong>{{ facture.status }}</strong></li>
+            </ul>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <a href="{{ path('app_factures_show', {'id': facture.id}) }}" class="btn btn-light border w-100 mb-2">
+                    <i class="bi bi-eye me-2"></i>Voir la facture
+                </a>
+                <a href="{{ path('app_factures_pdf', {'id': facture.id}) }}" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-file-pdf me-2"></i>Télécharger PDF
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Nouveau Client — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_client_index') }}" class="btn btn-light border" title="Retour aux clients">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_client_index') }}"><i class="bi bi-people me-1"></i>Clients</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nouveau client</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Ajouter un Nouveau Client</h1>
+            <p class="text-muted">Créez une fiche client complète pour le suivi des dossiers et la facturation.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus text-primary me-2"></i>Informations du client</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ include('client/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-lightbulb-fill"></i> Conseils d'ajout</div>
+            <ul>
+                <li><i class="bi bi-check-circle"></i> Saisissez un email valide pour l'envoi de factures.</li>
+                <li><i class="bi bi-check-circle"></i> Si "Entreprise", le Tax ID est recommandé.</li>
+                <li><i class="bi bi-check-circle"></i> N'oubliez pas d'assigner un avocat responsable.</li>
+                <li><i class="bi bi-check-circle"></i> Les remarques sont visibles uniquement en interne.</li>
+            </ul>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3"><i class="bi bi-person-badge me-1"></i>Types de client</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-2 py-1"><i class="bi bi-person me-1"></i>Particulier</span>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-2 py-1"><i class="bi bi-building me-1"></i>Entreprise</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

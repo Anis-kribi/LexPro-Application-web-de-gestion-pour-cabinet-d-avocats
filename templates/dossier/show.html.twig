@@ -1,0 +1,247 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}{{ dossier.numeroReference }} - LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_dossier_index') }}">Dossiers</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ dossier.numeroReference }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-folder2-open text-primary me-2"></i>{{ dossier.titre }}
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            {% if is_granted('ROLE_AVOCAT') %}
+            <a href="{{ path('app_factures_new') }}?dossier={{ dossier.id }}" class="btn btn-outline-success">
+                <i class="bi bi-receipt me-2"></i>Facturer
+            </a>
+            <a href="{{ path('app_dossier_edit', {'id': dossier.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            <form method="post" action="{{ path('app_dossier_delete', {'id': dossier.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce dossier ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ dossier.id) }}">
+                <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# Informations générales #}
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold">Détails du dossier</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Référence</span>
+                    <span class="fw-bold">{{ dossier.numeroReference }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Statut</span>
+                    <span class="badge bg-light text-dark border">{{ dossier.statuts }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Priorité</span>
+                    {% set badgeClass = {'Basse': 'secondary', 'Normale': 'info', 'Haute': 'warning', 'Urgente': 'danger'}[dossier.priorite] ?? 'secondary' %}
+                    <span class="badge bg-{{ badgeClass }}">{{ dossier.priorite }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Type de cas</span>
+                    <span class="fw-semibold">{{ dossier.typeCas ?: 'Non spécifié' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Date ouverture</span>
+                    <span>{{ dossier.dateDebut ? dossier.dateDebut|date('d/m/Y') : 'N/C' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                    <span class="text-muted">Avocat assigné</span>
+                    <span class="fw-semibold">{{ dossier.avocat ? dossier.avocat.fullName : 'Aucun' }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tribunal</span>
+                    <span>{{ dossier.nomTribunal ?: 'N/C' }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Adversaire</span>
+                    <span class="text-danger fw-semibold">{{ dossier.nomAdversaire ?: 'N/C' }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# Client Associé #}
+        {% if dossier.client %}
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10 mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3">Client Associé</h6>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-person-fill text-primary me-2"></i>
+                    <a href="{{ path('app_client_show', {id: dossier.client.id}) }}" class="fw-bold text-decoration-none fs-5">{{ dossier.client.fullName }}</a>
+                </div>
+                <div class="text-muted small ms-4">
+                    <div><i class="bi bi-telephone me-1"></i> {{ dossier.client.telephone ?: '-' }}</div>
+                    <div><i class="bi bi-envelope me-1"></i> {{ dossier.client.email ?: '-' }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Contenu principal #}
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">Description / Contexte</h5>
+                {% if dossier.description %}
+                    <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ dossier.description }}</p>
+                {% else %}
+                    <p class="text-muted fst-italic mb-0">Aucune description renseignée.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Onglets pour Tâches, Docs, Temps, Factures #}
+        <ul class="nav nav-tabs border-bottom-0 ms-1 mb-3" id="dossierTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active bg-white fw-bold shadow-sm" data-bs-toggle="tab" data-bs-target="#taches" type="button"><i class="bi bi-check2-square text-warning me-1"></i> Tâches ({{ dossier.taches|length }})</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link bg-white fw-bold shadow-sm ms-2" data-bs-toggle="tab" data-bs-target="#temps" type="button"><i class="bi bi-clock-history text-info me-1"></i> Temps ({{ dossier.entreesDeTemps|length }})</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link bg-white fw-bold shadow-sm ms-2" data-bs-toggle="tab" data-bs-target="#docs" type="button"><i class="bi bi-file-earmark-text text-primary me-1"></i> Documents ({{ dossier.documents|length }})</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link bg-white fw-bold shadow-sm ms-2" data-bs-toggle="tab" data-bs-target="#factures" type="button"><i class="bi bi-receipt text-success me-1"></i> Factures ({{ dossier.factures|length }})</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="dossierTabsContent">
+            {# Onglet Tâches #}
+            <div class="tab-pane fade show active" id="taches" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">Tâches du dossier</h6>
+                        <a href="{{ path('app_tache_new') }}?dossier={{ dossier.id }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-plus"></i> Ajouter</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for tache in dossier.taches %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1 {% if tache.status == 'Terminée' %}text-decoration-line-through text-muted{% endif %}">{{ tache.titre }}</h6>
+                                        <div class="small">
+                                            <span class="badge {% if tache.status == 'Terminée' %}bg-success{% elseif tache.status == 'En cours' %}bg-primary{% else %}bg-secondary{% endif %} me-2">{{ tache.status }}</span>
+                                            {% if tache.assigneA %}<span class="text-muted"><i class="bi bi-person me-1"></i>{{ tache.assigneA.fullName }}</span>{% endif %}
+                                            {% if tache.dateEcheance %}<span class="text-muted ms-3"><i class="bi bi-calendar me-1"></i>Échéance: {{ tache.dateEcheance|date('d/m/Y') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="p-4 text-center text-muted">Aucune tâche trouvée.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Onglet Temps #}
+            <div class="tab-pane fade" id="temps" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">Temps passé</h6>
+                        <a href="{{ path('app_entree_temps_new') }}?dossier={{ dossier.id }}" class="btn btn-sm btn-outline-info"><i class="bi bi-plus"></i> Saisir temps</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead class="table-light"><tr><th>Date</th><th>Collaborateur</th><th>Durée</th><th>Facturable</th></tr></thead>
+                            <tbody>
+                                {% set totalH = 0 %}
+                                {% for t in dossier.entreesDeTemps %}
+                                {% set totalH = totalH + t.heures %}
+                                <tr>
+                                    <td>{{ t.date|date('d/m/Y') }}</td>
+                                    <td>{{ t.user.fullName }}</td>
+                                    <td class="fw-bold">{{ t.heures }}h</td>
+                                    <td>{% if t.facturable %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-dash-circle text-muted"></i>{% endif %}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">Aucun temps saisi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                            {% if dossier.entreesDeTemps|length > 0 %}
+                            <tfoot class="table-light fw-bold">
+                                <tr><td colspan="2" class="text-end">Total :</td><td>{{ totalH }}h</td><td></td></tr>
+                            </tfoot>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {# Onglet Documents #}
+            <div class="tab-pane fade" id="docs" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">Documents</h6>
+                        <a href="{{ path('app_document_new') }}?dossier={{ dossier.id }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-upload"></i> Ajouter</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for doc in dossier.documents %}
+                            <li class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-file-earmark-pdf fs-4 text-danger me-2 align-middle"></i>
+                                    <a href="{{ path('app_document_download', {id: doc.id}) }}" class="fw-bold text-decoration-none">{{ doc.titre }}</a>
+                                    <div class="small text-muted mt-1">{{ doc.createdAt|date('d/m/Y H:i') }} par {{ doc.telechargepar ? doc.telechargepar.fullName : 'Inconnu' }}</div>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li class="list-group-item p-4 text-center text-muted">Aucun document attaché.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {# Onglet Factures #}
+            <div class="tab-pane fade" id="factures" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold">Factures</h6>
+                        <a href="{{ path('app_factures_new') }}?dossier={{ dossier.id }}" class="btn btn-sm btn-outline-success"><i class="bi bi-plus"></i> Créer facture</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead class="table-light"><tr><th>Numéro</th><th>Date</th><th>Montant TTC</th><th>Statut</th><th></th></tr></thead>
+                            <tbody>
+                                {% for fac in dossier.factures %}
+                                <tr>
+                                    <td><a href="{{ path('app_factures_show', {id: fac.id}) }}" class="fw-bold">{{ fac.numeroFacture }}</a></td>
+                                    <td>{{ fac.dateEmission|date('d/m/Y') }}</td>
+                                    <td class="fw-bold">{{ fac.montantTtc|number_format(2, ',', ' ') }} DT</td>
+                                    <td><span class="badge bg-light text-dark border">{{ fac.status }}</span></td>
+                                    <td class="text-end"><a href="{{ path('app_factures_pdf', {id: fac.id}) }}" class="btn btn-sm btn-light"><i class="bi bi-download text-danger"></i></a></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" class="text-center py-4 text-muted">Aucune facture.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

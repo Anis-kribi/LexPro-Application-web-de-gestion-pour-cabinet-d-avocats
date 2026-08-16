@@ -1,0 +1,170 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Dossiers — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-folder2-open fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Dossiers</h1>
+                <p class="text-muted mb-0">Gestion des affaires en cours et archivées</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_AVOCAT') %}
+        <a href="{{ path('app_dossier_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Nouveau Dossier
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Filter Card ── #}
+<div class="filter-card p-0 overflow-hidden">
+    <div class="bg-light border-bottom px-3 py-2">
+        <ul class="nav crud-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link {% if not statut %}active{% endif %}" href="{{ path('app_dossier_index') }}">Tous ({{ statsByStatut|reduce((carry, v) => carry + v, 0) }})</a>
+            </li>
+            {% for st in ['En cours', 'Suspendu', 'Clôturé', 'Archivé'] %}
+            <li class="nav-item">
+                <a class="nav-link {% if statut == st %}active{% endif %}" href="{{ path('app_dossier_index', {'statut': st}) }}">
+                    {{ st }} <span class="badge bg-secondary bg-opacity-25 text-dark ms-1 rounded-pill">{{ statsByStatut[st] ?? 0 }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <input type="hidden" name="statut" value="{{ statut }}">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0" placeholder="Référence, Titre, Client..." value="{{ keyword }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="priorite" class="form-select">
+                    <option value="">Toutes priorités</option>
+                    <option value="Basse" {% if priorite == 'Basse' %}selected{% endif %}>Basse</option>
+                    <option value="Normale" {% if priorite == 'Normale' %}selected{% endif %}>Normale</option>
+                    <option value="Haute" {% if priorite == 'Haute' %}selected{% endif %}>Haute</option>
+                    <option value="Urgente" {% if priorite == 'Urgente' %}selected{% endif %}>Urgente</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-filter me-1"></i>Filtrer</button>
+            </div>
+            {% if keyword or priorite or app.request.query.get('client') %}
+            <div class="col-md-2">
+                <a href="{{ path('app_dossier_index') }}" class="btn btn-light w-100 border" title="Réinitialiser"><i class="bi bi-x-lg"></i></a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Référence / Titre</th>
+                        <th>Client</th>
+                        <th>Type / Priorité</th>
+                        <th>Dates</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for dossier in dossiers %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{{ path('app_dossier_show', {'id': dossier.id}) }}" class="fw-bold text-decoration-none text-primary">
+                                <i class="bi bi-folder-fill text-warning me-2"></i>{{ dossier.numeroReference }}
+                            </a>
+                            <div class="small fw-semibold text-dark mt-1">{{ dossier.titre|slice(0, 45) }}{% if dossier.titre|length > 45 %}...{% endif %}</div>
+                        </td>
+                        <td>
+                            {% if dossier.client %}
+                            <div class="fw-semibold">{{ dossier.client.fullName }}</div>
+                            <div class="small text-muted"><i class="bi bi-person me-1"></i>{{ dossier.client.type|capitalize }}</div>
+                            {% else %}
+                            <span class="text-muted fst-italic">Non assigné</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="mb-1"><span class="badge bg-light text-dark border">{{ dossier.typeCas ?: 'Général' }}</span></div>
+                            {% set pClass = {'Basse': 'secondary', 'Normale': 'info', 'Haute': 'warning', 'Urgente': 'danger'}[dossier.priorite] ?? 'secondary' %}
+                            <span class="badge bg-{{ pClass }} bg-opacity-25 text-{{ pClass }} border border-{{ pClass }} rounded-pill">
+                                <i class="bi bi-flag-fill me-1"></i>{{ dossier.priorite }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="small text-muted mb-1" title="Date d'ouverture"><i class="bi bi-calendar-check me-1"></i>{{ dossier.dateDebut ? dossier.dateDebut|date('d/m/Y') : '—' }}</div>
+                            <div class="small text-muted" title="Date de clôture/fin"><i class="bi bi-calendar-event me-1"></i>{{ dossier.dateFin ? dossier.dateFin|date('d/m/Y') : '—' }}</div>
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_dossier_show', {'id': dossier.id}) }}" class="crud-btn crud-btn-view" title="Voir"><i class="bi bi-eye"></i></a>
+                                {% if is_granted('ROLE_AVOCAT') %}
+                                <a href="{{ path('app_dossier_edit', {'id': dossier.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-folder-x"></i></div>
+                                <h5>Aucun dossier trouvé</h5>
+                                <p>Modifiez vos critères de recherche ou ouvrez un nouveau dossier.</p>
+                                {% if is_granted('ROLE_AVOCAT') %}
+                                <a href="{{ path('app_dossier_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nouveau Dossier</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if totalPages > 1 %}
+    <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
+        <small class="text-muted">Page {{ page }} sur {{ totalPages }}</small>
+        <ul class="pagination pagination-sm mb-0">
+            {% if page > 1 %}
+            <li class="page-item"><a class="page-link" href="{{ path('app_dossier_index', {'page': page-1, 'search': keyword, 'statut': statut, 'priorite': priorite}) }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            {% for p in 1..totalPages %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ path('app_dossier_index', {'page': p, 'search': keyword, 'statut': statut, 'priorite': priorite}) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            {% if page < totalPages %}
+            <li class="page-item"><a class="page-link" href="{{ path('app_dossier_index', {'page': page+1, 'search': keyword, 'statut': statut, 'priorite': priorite}) }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

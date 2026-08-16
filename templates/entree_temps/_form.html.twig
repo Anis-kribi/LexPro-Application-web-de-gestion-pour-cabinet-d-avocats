@@ -1,0 +1,57 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+
+<div class="row g-4">
+    <div class="col-md-6 border-end">
+        <div class="form-group mb-4">
+            {{ form_label(form.dossier) }}
+            {{ form_widget(form.dossier, {'attr': {'class': 'form-select select2'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.dossier) }}</div>
+        </div>
+        <div class="form-group mb-3">
+            {{ form_label(form.user) }}
+            {{ form_widget(form.user, {'attr': {'class': 'form-select'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.user) }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    {{ form_label(form.date) }}
+                    {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.date) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    {{ form_label(form.heures) }}
+                    <div class="input-group">
+                        {{ form_widget(form.heures, {'attr': {'class': 'form-control text-end'}}) }}
+                        <span class="input-group-text fw-bold">h</span>
+                    </div>
+                    <div class="text-danger small mt-1">{{ form_errors(form.heures) }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-check form-switch mb-3 mt-2">
+            {{ form_widget(form.facturable, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+            {{ form_label(form.facturable, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
+        </div>
+    </div>
+
+    <div class="col-12 mt-3 pt-3 border-top">
+        <div class="form-group mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2 border-top pt-4">
+    <a href="{{ path('app_entree_temps_index') }}" class="btn btn-light border">Annuler</a>
+    <button class="btn btn-primary">{{ button_label|default('Enregistrer le temps') }}</button>
+</div>
+
+{{ form_end(form) }}

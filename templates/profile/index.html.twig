@@ -1,0 +1,269 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}LexPro — Mon Profil{% endblock %}
+{% block page_title %}<i class="bi bi-person-circle me-2 text-primary"></i>Mon Profil{% endblock %}
+
+{% block stylesheets %}
+<style>
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: -60px;
+    z-index: 2;
+}
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 5px solid var(--white);
+    box-shadow: var(--shadow-md);
+    object-fit: cover;
+    background: var(--white);
+    transition: transform 0.3s var(--ease);
+}
+.profile-avatar:hover {
+    transform: scale(1.05);
+}
+.role-badge-admin    { background: linear-gradient(135deg, var(--danger), #b91c1c); }
+.role-badge-avocat   { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); }
+.role-badge-assistant{ background: linear-gradient(135deg, var(--success), #047857); }
+
+.profile-hero {
+    height: 140px;
+    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    position: relative;
+    overflow: hidden;
+}
+.profile-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+.profile-card {
+    border: 1px solid var(--g200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    background: var(--white);
+    transition: box-shadow 0.3s var(--ease);
+}
+.profile-card:hover {
+    box-shadow: var(--shadow-md);
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .85rem 0;
+    border-bottom: 1px dashed var(--g200);
+    font-size: .9rem;
+}
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--g500); font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+.info-value { font-weight: 600; color: var(--g800); text-align: right; }
+
+.section-divider {
+    position: relative;
+    text-align: center;
+    margin: 2.5rem 0 1.5rem;
+}
+.section-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--g200);
+}
+.section-divider span {
+    position: relative;
+    background: var(--white);
+    padding: 0 1rem;
+    color: var(--g500);
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+.form-section-title {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4" style="max-width:1000px;">
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show rounded-3 shadow-sm mb-4 animate-slide-up" role="alert">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row g-4">
+
+        {# ── Colonne gauche : Carte identité ── #}
+        <div class="col-lg-4">
+            <div class="profile-card animate-slide-up stagger-1">
+                <div class="profile-hero"></div>
+                <div class="text-center px-4 pb-4">
+                    <div class="profile-avatar-wrapper mb-3 position-relative">
+                        <img src="{{ user.image ? asset('uploads/users/' ~ user.image) : 'https://ui-avatars.com/api/?name=' ~ user.getFullName()|url_encode ~ '&size=120&background=' ~ (is_granted('ROLE_ADMIN') ? 'dc2626' : (is_granted('ROLE_AVOCAT') ? '3730a3' : '059669')) ~ '&color=fff&bold=true' }}"
+                             class="profile-avatar" alt="{{ user.getFullName() }}">
+                        <label for="{{ form.imageFile.vars.id }}" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 36px; height: 36px; cursor: pointer; border: 3px solid var(--white); z-index: 10;">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                    </div>
+                    <h4 class="mb-1 fw-bold text-dark">{{ user.getFullName() }}</h4>
+                    <p class="mb-3 text-muted small">{{ user.email }}</p>
+                    <span class="badge text-white px-3 py-2 rounded-pill shadow-sm
+                        {% if is_granted('ROLE_ADMIN') %}role-badge-admin
+                        {% elseif is_granted('ROLE_AVOCAT') %}role-badge-avocat
+                        {% else %}role-badge-assistant{% endif %}">
+                        <i class="bi bi-{{ is_granted('ROLE_ADMIN') ? 'shield-fill' : (is_granted('ROLE_AVOCAT') ? 'briefcase-fill' : 'person-fill') }} me-1"></i>
+                        {% if is_granted('ROLE_ADMIN') %}Administrateur
+                        {% elseif is_granted('ROLE_AVOCAT') %}Avocat
+                        {% else %}Assistant{% endif %}
+                    </span>
+                </div>
+                <div class="card-body px-4 py-3 border-top" style="background: var(--g50); border-color: var(--g200) !important;">
+                    <div class="info-row">
+                        <span class="info-label"><i class="bi bi-person text-primary"></i>Prénom</span>
+                        <span class="info-value">{{ user.prenom ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="bi bi-person-badge text-primary"></i>Nom</span>
+                        <span class="info-value">{{ user.nom ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="bi bi-telephone text-primary"></i>Téléphone</span>
+                        <span class="info-value">{{ user.telephone ?? '—' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="bi bi-calendar3 text-primary"></i>Membre depuis</span>
+                        <span class="info-value">{{ user.createdAt ? user.createdAt|date('d/m/Y') : '—' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Colonne droite : Formulaire de modification ── #}
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 animate-slide-up stagger-2" style="background: var(--white); border: 1px solid var(--g200) !important;">
+                <div class="card-header bg-transparent py-4 px-4 px-md-5 d-flex align-items-center" style="border-bottom: 1px solid var(--g200) !important;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 48px; height: 48px;">
+                        <i class="bi bi-pencil-square fs-4 icon-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold text-dark">Modifier mon profil</h4>
+                        <p class="text-muted small mb-0 mt-1">Mettez à jour vos informations personnelles et vos paramètres de sécurité.</p>
+                    </div>
+                </div>
+                <div class="card-body px-4 px-md-5 py-4">
+
+                    {{ form_start(form, {attr: {id: 'profile-form', enctype: 'multipart/form-data'}}) }}
+
+                    {# ── Informations personnelles ── #}
+                    <div class="form-section-title">Informations personnelles</div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="{{ form.prenom.vars.id }}">Prénom</label>
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            {{ form_errors(form.prenom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="{{ form.nom.vars.id }}">Nom</label>
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            {{ form_errors(form.nom) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="{{ form.telephone.vars.id }}">Téléphone</label>
+                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            {{ form_errors(form.telephone) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Adresse Email</label>
+                            <input type="email" class="form-control form-control-lg text-muted" style="background: var(--g100);" value="{{ user.email }}" readonly>
+                            <small class="text-muted mt-1 d-block"><i class="bi bi-lock-fill me-1"></i>L'email ne peut pas être modifié.</small>
+                        </div>
+                        <div class="col-12 d-none">
+                            {{ form_widget(form.imageFile) }}
+                        </div>
+                    </div>
+
+                    <div class="section-divider"><span>Sécurité</span></div>
+
+                    {# ── Changement mot de passe ── #}
+                    <div class="form-section-title text-warning"><i class="bi bi-shield-lock me-2"></i>Changer le mot de passe</div>
+                    <div class="p-4 rounded-4 mb-4" style="background: var(--g50); border: 1px solid var(--g200);">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="{{ form.currentPassword.vars.id }}">
+                                    Mot de passe actuel <span class="text-danger">*</span>
+                                </label>
+                                {{ form_widget(form.currentPassword, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                                {{ form_errors(form.currentPassword) }}
+                                <small class="text-muted mt-1 d-block">Requis uniquement pour changer de mot de passe.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.newPassword.first.vars.id }}">Nouveau mot de passe</label>
+                                {{ form_widget(form.newPassword.first, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                                {{ form_errors(form.newPassword.first) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="{{ form.newPassword.second.vars.id }}">Confirmer le mot de passe</label>
+                                {{ form_widget(form.newPassword.second, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                                {{ form_errors(form.newPassword.second) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end mt-5 pt-3" style="border-top: 1px solid var(--g200);">
+                        <a href="{{ path('backend_dashboard') }}" class="btn btn-light btn-lg px-4 fw-semibold text-muted hover-lift">Annuler</a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm hover-lift" id="btn-save-profile">
+                            <i class="bi bi-check-lg me-2"></i>Enregistrer
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.imageFile.vars.id }}');
+    const avatarImg = document.querySelector('.profile-avatar');
+
+    if(fileInput && avatarImg) {
+        fileInput.addEventListener('change', function(e) {
+            if(this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarImg.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

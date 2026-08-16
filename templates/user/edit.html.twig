@@ -1,0 +1,185 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}LexPro — Modifier utilisateur{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_user_index') }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_user_index') }}"><i class="bi bi-people me-1"></i>Utilisateurs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Modifier l'Utilisateur</h1>
+            <p class="text-muted">{{ user.getFullName() }} — {{ user.email }}</p>
+        </div>
+    </div>
+</div>
+
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center gap-3">
+                {% if user.image %}
+                    <img src="{{ asset('uploads/users/' ~ user.image) }}" class="avatar avatar-md" alt="{{ user.getFullName() }}">
+                {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ user.getFullName()|url_encode }}&background=6366f1&color=fff"
+                         class="avatar avatar-md" alt="{{ user.getFullName() }}">
+                {% endif %}
+                <h6 class="mb-0 fw-bold text-primary">Informations de {{ user.getFullName() }}</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ form_start(form, {attr: {id: 'user-edit-form'}}) }}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom</label>
+                        {{ form_widget(form.prenom) }}
+                        {{ form_errors(form.prenom) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom</label>
+                        {{ form_widget(form.nom) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Email</label>
+                        {{ form_widget(form.email) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Téléphone</label>
+                        {{ form_widget(form.telephone) }}
+                        {{ form_errors(form.telephone) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Rôle</label>
+                        {{ form_widget(form.roles) }}
+                        {{ form_errors(form.roles) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nouveau mot de passe</label>
+                        {{ form_widget(form.plainPassword) }}
+                        {{ form_errors(form.plainPassword) }}
+                        <small class="text-muted">Laisser vide pour conserver l'actuel.</small>
+                    </div>
+                    <div class="col-12" id="manager-container" style="display: none;">
+                        <label class="form-label fw-semibold">Avocat Responsable *</label>
+                        {{ form_widget(form.manager) }}
+                        {{ form_errors(form.manager) }}
+                    </div>
+                    <div class="col-12 mt-4">
+                        <label class="form-label fw-semibold">Photo de profil</label>
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="img-preview-container shadow-sm">
+                                {% if user.image %}
+                                    <img id="avatar-preview" src="{{ asset('uploads/users/' ~ user.image) }}" alt="Preview">
+                                {% else %}
+                                    <img id="avatar-preview" src="https://ui-avatars.com/api/?name={{ user.getFullName()|url_encode }}&background=6366f1&color=fff" alt="Preview">
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control', 'onchange': 'if (this.files && this.files[0]) { var reader = new FileReader(); reader.onload = function(e) { document.getElementById("avatar-preview").src = e.target.result; }; reader.readAsDataURL(this.files[0]); }'}}) }}
+                                <small class="text-muted d-block mt-2">Format JPG, PNG ou WEBP. Taille max 2Mo.</small>
+                                {{ form_errors(form.image) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                    <a href="{{ path('app_user_index') }}" class="btn btn-light">Annuler</a>
+                    <button type="submit" class="btn btn-primary" id="btn-update-user">
+                        <i class="bi bi-check-lg me-2"></i>Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-shield-lock"></i> Compte actuel</div>
+            <ul>
+                <li><i class="bi bi-envelope"></i> {{ user.email }}</li>
+                <li><i class="bi bi-telephone"></i> {{ user.telephone ?: 'Non renseigné' }}</li>
+                <li><i class="bi bi-person-badge"></i> {{ user.roles[0]|replace({'ROLE_': ''}) }}</li>
+            </ul>
+        </div>
+        
+        <div class="card border-danger border-opacity-25 shadow-sm rounded-3">
+            <div class="card-body px-4 py-3">
+                <h6 class="mb-1 text-danger fw-semibold">Zone de danger</h6>
+                <p class="small text-muted mb-3">Cette action est irréversible et supprimera le compte.</p>
+                <form action="{{ path('app_user_delete', {id: user.id}) }}" method="POST"
+                      onsubmit="return confirm('Supprimer définitivement {{ user.getFullName() }} ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                    <button class="btn btn-outline-danger btn-sm w-100" type="submit" id="btn-delete-user">
+                        <i class="bi bi-trash me-1"></i>Supprimer le compte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imgInput = document.querySelector('input[type="file"]');
+    const preview = document.getElementById('avatar-preview');
+    
+    if (imgInput && preview) {
+        imgInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Gestion du champ manager pour Assistant
+    const roleSelect = document.querySelector('select[name="user[roles]"]');
+    const managerContainer = document.getElementById('manager-container');
+    const managerSelect = document.querySelector('.manager-select');
+
+    function toggleManager() {
+        if (roleSelect && roleSelect.value === 'ROLE_ASSISTANT') {
+            managerContainer.style.display = 'block';
+            if (managerSelect) managerSelect.required = true;
+        } else {
+            managerContainer.style.display = 'none';
+            if (managerSelect) {
+                managerSelect.required = false;
+                managerSelect.value = '';
+            }
+        }
+    }
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleManager);
+        toggleManager(); // initial check
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

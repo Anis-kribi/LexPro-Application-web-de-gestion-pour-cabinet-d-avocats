@@ -1,0 +1,139 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Résultats de recherche - LexPro{% endblock %}
+
+{% block page_title %}Recherche Globale{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">
+            {% if q is not empty %}
+            Résultats pour : <span class="text-primary">"{{ q }}"</span>
+            {% else %}
+            Recherche
+            {% endif %}
+        </h4>
+    </div>
+
+    {% if q is empty %}
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            <div>Veuillez saisir un terme dans la barre de recherche en haut.</div>
+        </div>
+    {% else %}
+        {% set hasResults = results.clients|length > 0 or results.dossiers|length > 0 or results.documents|length > 0 or results.taches|length > 0 %}
+
+        {% if not hasResults %}
+            <div class="alert alert-warning d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <div>Aucun résultat trouvé pour "<strong>{{ q }}</strong>". Veuillez essayer avec un autre mot-clé.</div>
+            </div>
+        {% else %}
+            <div class="row g-4">
+                
+                {# Clients #}
+                {% if results.clients|length > 0 %}
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center py-3">
+                            <i class="bi bi-people-fill text-primary fs-5 me-2"></i>
+                            <h5 class="mb-0 fw-bold">Clients <span class="badge bg-primary rounded-pill ms-2">{{ results.clients|length }}</span></h5>
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                            {% for client in results.clients %}
+                                <a href="{{ path('app_client_show', {'id': client.id}) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3 border-bottom">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-person text-primary fs-5"></i>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <h6 class="mb-1 fw-semibold text-truncate">{{ client.getFullName() }}</h6>
+                                        <small class="text-muted d-block text-truncate">{{ client.email ?? client.telephone ?? 'Pas de contact' }}</small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Dossiers #}
+                {% if results.dossiers|length > 0 %}
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center py-3">
+                            <i class="bi bi-folder2-open text-warning fs-5 me-2"></i>
+                            <h5 class="mb-0 fw-bold">Dossiers <span class="badge bg-warning text-dark rounded-pill ms-2">{{ results.dossiers|length }}</span></h5>
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                            {% for dossier in results.dossiers %}
+                                <a href="{{ path('app_dossier_show', {'id': dossier.id}) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3 border-bottom">
+                                    <div class="bg-warning bg-opacity-10 rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-folder-fill text-warning fs-5"></i>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <h6 class="mb-1 fw-semibold text-truncate">{{ dossier.titre }}</h6>
+                                        <small class="text-muted d-block text-truncate">Réf: {{ dossier.numeroReference }}</small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Documents #}
+                {% if results.documents|length > 0 %}
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center py-3">
+                            <i class="bi bi-file-earmark-text-fill text-info fs-5 me-2"></i>
+                            <h5 class="mb-0 fw-bold">Documents <span class="badge bg-info text-dark rounded-pill ms-2">{{ results.documents|length }}</span></h5>
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                            {% for document in results.documents %}
+                                <a href="{{ path('app_document_show', {'id': document.id}) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3 border-bottom">
+                                    <div class="bg-info bg-opacity-10 rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-file-earmark-text text-info fs-5"></i>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <h6 class="mb-1 fw-semibold text-truncate">{{ document.titre }}</h6>
+                                        <small class="text-muted d-block text-truncate">Dossier: {{ document.dossier ? document.dossier.numeroReference : 'N/A' }}</small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Taches #}
+                {% if results.taches|length > 0 %}
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center py-3">
+                            <i class="bi bi-check2-square text-success fs-5 me-2"></i>
+                            <h5 class="mb-0 fw-bold">Tâches <span class="badge bg-success rounded-pill ms-2">{{ results.taches|length }}</span></h5>
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                            {% for tache in results.taches %}
+                                 <a href="{{ path('app_tache_show', {'id': tache.id}) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3 border-bottom">
+                                    <div class="bg-success bg-opacity-10 rounded p-2 me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-check2 text-success fs-5"></i>
+                                    </div>
+                                    <div class="text-truncate">
+                                        <h6 class="mb-1 fw-semibold text-truncate">{{ tache.titre }}</h6>
+                                        <small class="text-muted d-block text-truncate">Statut: {{ tache.status }}</small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

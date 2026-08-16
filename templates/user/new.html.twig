@@ -1,0 +1,142 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}LexPro — Nouvel utilisateur{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_user_index') }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_user_index') }}"><i class="bi bi-people me-1"></i>Utilisateurs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nouveau</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Créer un Utilisateur</h1>
+            <p class="text-muted">Ajoutez un nouveau collaborateur ou assistant au système.</p>
+        </div>
+    </div>
+</div>
+
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus text-primary me-2"></i>Informations du nouvel utilisateur</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ form_start(form, {attr: {id: 'user-create-form'}}) }}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Prénom</label>
+                        {{ form_widget(form.prenom) }}
+                        {{ form_errors(form.prenom) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nom</label>
+                        {{ form_widget(form.nom) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Email</label>
+                        {{ form_widget(form.email) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Téléphone</label>
+                        {{ form_widget(form.telephone) }}
+                        {{ form_errors(form.telephone) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Rôle</label>
+                        {{ form_widget(form.roles) }}
+                        {{ form_errors(form.roles) }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mot de passe</label>
+                        {{ form_widget(form.plainPassword) }}
+                        {{ form_errors(form.plainPassword) }}
+                    </div>
+                    <div class="col-12" id="manager-container" style="display: none;">
+                        <label class="form-label fw-semibold">Avocat Responsable *</label>
+                        {{ form_widget(form.manager) }}
+                        {{ form_errors(form.manager) }}
+                    </div>
+                    <div class="col-12 mt-4">
+                        <label class="form-label fw-semibold">Photo de profil</label>
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="img-preview-container shadow-sm">
+                                <img id="avatar-preview" src="https://ui-avatars.com/api/?name=New+User&background=6366f1&color=fff" alt="Preview">
+                            </div>
+                            <div class="flex-grow-1">
+                                {{ form_widget(form.image) }}
+                                <small class="text-muted d-block mt-2">Format JPG, PNG ou WEBP. Taille max 2Mo.</small>
+                                {{ form_errors(form.image) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                    <a href="{{ path('app_user_index') }}" class="btn btn-light">Annuler</a>
+                    <button type="submit" class="btn btn-primary" id="btn-save-user">
+                        <i class="bi bi-check-lg me-2"></i>Créer l'utilisateur
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-shield-lock"></i> Sécurité & Rôles</div>
+            <ul>
+                <li><i class="bi bi-info-circle"></i> Le rôle ADMIN ne peut pas être attribué via ce formulaire.</li>
+                <li><i class="bi bi-info-circle"></i> Le rôle ASSISTANT nécessite la sélection d'un avocat responsable.</li>
+                <li><i class="bi bi-info-circle"></i> Le mot de passe doit être sécurisé et communiqué de manière confidentielle.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="user[roles]"]');
+    const managerContainer = document.getElementById('manager-container');
+    const managerSelect = document.querySelector('.manager-select');
+
+    function toggleManager() {
+        if (roleSelect && roleSelect.value === 'ROLE_ASSISTANT') {
+            managerContainer.style.display = 'block';
+            if (managerSelect) managerSelect.required = true;
+        } else {
+            managerContainer.style.display = 'none';
+            if (managerSelect) {
+                managerSelect.required = false;
+                managerSelect.value = '';
+            }
+        }
+    }
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleManager);
+        toggleManager(); // initial check
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

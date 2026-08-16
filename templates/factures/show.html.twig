@@ -1,0 +1,152 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Facture {{ facture.numeroFacture }} — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a href="{{ path('app_factures_index') }}" class="btn btn-light border me-3" title="Retour"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{{ path('app_factures_index') }}">Factures</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ facture.numeroFacture }}</li>
+                    </ol>
+                </nav>
+                <h1 class="h4 mb-0 fw-bold"><i class="bi bi-receipt text-primary me-2"></i>Facture {{ facture.numeroFacture }}</h1>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_factures_pdf', {'id': facture.id}) }}" class="btn btn-danger">
+                <i class="bi bi-file-pdf me-2"></i>Télécharger PDF
+            </a>
+            {% if is_granted('ROLE_AVOCAT') %}
+            <a href="{{ path('app_factures_edit', {'id': facture.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            {{ include('factures/_delete_form.html.twig') }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# ── Facture Info ── #}
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">Détails de la Facture</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="p-4 border-bottom text-center bg-light">
+                    <h2 class="mb-1 fw-bold text-dark">{{ facture.montantTtc|number_format(2, ',', ' ') }} <small class="fs-6 text-muted">DT TTC</small></h2>
+                    {% set badgeClasses = {'Brouillon': 'secondary', 'En attente': 'warning text-dark', 'Payée': 'success', 'Impayée': 'danger', 'Annulée': 'dark'} %}
+                    <span class="badge bg-{{ badgeClasses[facture.status] ?? 'secondary' }} rounded-pill px-3">{{ facture.status }}</span>
+                </div>
+                <div class="p-4">
+                    <div class="info-row">
+                        <span class="info-label">Numéro</span>
+                        <span class="info-value text-primary">{{ facture.numeroFacture }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Émission</span>
+                        <span class="info-value">{{ facture.dateEmission|date('d/m/Y') }}</span>
+                    </div>
+                    {% if facture.dateEcheance %}
+                    <div class="info-row">
+                        <span class="info-label">Échéance</span>
+                        <span class="info-value {% if facture.dateEcheance < date() and facture.status == 'En attente' %}text-danger{% endif %}">
+                            {{ facture.dateEcheance|date('d/m/Y') }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# ── Client & Dossier ── #}
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10">
+            <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3">Facturé à</h6>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-person-fill text-primary me-2"></i>
+                    <a href="{{ path('app_client_show', {id: facture.client.id}) }}" class="fw-bold text-decoration-none fs-5">{{ facture.client.fullName }}</a>
+                </div>
+                {% if facture.dossier %}
+                <div class="d-flex align-items-center text-muted small ms-4">
+                    <i class="bi bi-folder2 me-2"></i>
+                    <a href="{{ path('app_dossier_show', {id: facture.dossier.id}) }}" class="text-muted text-decoration-none">Dossier {{ facture.dossier.numeroReference }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Lignes de facturation ── #}
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">Lignes de la Facture</h6>
+                {% if is_granted('ROLE_AVOCAT') and facture.status != 'Payée' %}
+                <a href="{{ path('app_factures_edit', {'id': facture.id}) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i> Modifier la facture
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Description</th>
+                            <th class="text-center">Qté</th>
+                            <th class="text-end">Prix Unitaire</th>
+                            <th class="text-end pe-4">Total Ligne</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in facture.articles %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-semibold text-dark">{{ article.description }}</div>
+                            </td>
+                            <td class="text-center">{{ article.quantite }}</td>
+                            <td class="text-end">{{ article.prixUnitaire|number_format(2, ',', ' ') }} DT</td>
+                            <td class="text-end pe-4 fw-bold">{{ article.total|number_format(2, ',', ' ') }} DT</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="text-muted"><i class="bi bi-basket fs-2 mb-2 d-block"></i>Aucune ligne de facturation pour le moment.</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if facture.articles|length > 0 %}
+            <div class="card-footer bg-light border-top">
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted fw-semibold">Total HT</span>
+                            <span class="fw-bold">{{ facture.montantHt|number_format(2, ',', ' ') }} DT</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                            <span class="text-muted fw-semibold">TVA ({{ facture.tva }}%)</span>
+                            <span class="fw-bold">{{ (facture.montantHt * (facture.tva / 100))|number_format(2, ',', ' ') }} DT</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark fs-5">Total TTC</span>
+                            <span class="fw-bold text-primary fs-4">{{ facture.montantTtc|number_format(2, ',', ' ') }} DT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

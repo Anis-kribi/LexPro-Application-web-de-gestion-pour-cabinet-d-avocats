@@ -1,0 +1,113 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Entrées de Temps — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-stopwatch fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Entrées de Temps</h1>
+                <p class="text-muted mb-0">Suivi du temps de travail par dossier</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_AVOCAT') %}
+        <a href="{{ path('app_entree_temps_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Nouvelle Saisie
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold">Historique des saisies de temps</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Dossier / Client</th>
+                        <th>Utilisateur</th>
+                        <th>Durée</th>
+                        <th>Description</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for entree in entrees %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-dark">
+                            <i class="bi bi-calendar-event text-muted me-2"></i>{{ entree.date ? entree.date|date('d/m/Y') : '' }}
+                        </td>
+                        <td>
+                            <a href="{{ path('app_dossier_show', {'id': entree.dossier.id}) }}" class="fw-bold text-decoration-none text-primary"><i class="bi bi-folder2 text-warning me-1"></i>{{ entree.dossier.numeroReference }}</a>
+                            <div class="small text-muted">{{ entree.dossier.client.fullName }}</div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if entree.user.image %}
+                                    <img src="{{ asset('uploads/users/' ~ entree.user.image) }}" class="avatar avatar-sm me-2" alt="{{ entree.user.fullName }}">
+                                {% else %}
+                                    <div class="avatar avatar-sm bg-primary bg-opacity-10 text-primary me-2 fw-bold">
+                                        {{ entree.user.nom|slice(0,1)|upper }}
+                                    </div>
+                                {% endif %}
+                                <span class="small fw-semibold">{{ entree.user.fullName }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border px-3 py-2 fs-6"><i class="bi bi-clock me-1"></i>{{ entree.heures }}h</span>
+                        </td>
+                        <td>
+                            <span class="small text-muted" style="max-width:250px; display:inline-block;">{{ entree.description ? entree.description|slice(0, 50) : '—' }}{% if entree.description and entree.description|length > 50 %}...{% endif %}</span>
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                {% if entree.user == app.user or is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_entree_temps_edit', {'id': entree.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                <form method="post" action="{{ path('app_entree_temps_delete', {'id': entree.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer cette saisie ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entree.id) }}">
+                                    <button class="crud-btn crud-btn-delete" title="Supprimer"><i class="bi bi-trash"></i></button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-stopwatch"></i></div>
+                                <h5>Aucun temps saisi</h5>
+                                <p>Enregistrez le temps passé sur vos dossiers pour une meilleure facturation.</p>
+                                {% if is_granted('ROLE_AVOCAT') %}
+                                <a href="{{ path('app_entree_temps_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Saisir du temps</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

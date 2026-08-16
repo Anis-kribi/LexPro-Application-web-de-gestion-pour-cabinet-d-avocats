@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.numeroFacture }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .facture-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .facture-info .left, .facture-info .right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
+        .facture-info h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 14px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .info-table {
+            width: 100%;
+        }
+        .info-table td {
+            padding: 4px 0;
+        }
+        .info-table td:first-child {
+            font-weight: bold;
+            width: 100px;
+            color: #555;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        table.items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table.items-table th {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: left;
+            color: #2c3e50;
+        }
+        table.items-table td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+        }
+        .total-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            page-break-inside: avoid;
+        }
+        .total-row {
+            display: table;
+            width: 100%;
+        }
+        .total-row > div {
+            display: table-cell;
+        }
+        .total-labels {
+            text-align: right;
+            padding-right: 20px;
+            color: #555;
+        }
+        .total-values {
+            text-align: right;
+            width: 120px;
+            font-weight: bold;
+        }
+        .total-final {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #dee2e6;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 10px;
+            color: #7f8c8d;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>FACTURE</h1>
+        <p>N° {{ facture.numeroFacture ?: facture.id }}</p>
+        <p>Date d'émission : {{ facture.dateEmission ? facture.dateEmission|date('d/m/Y') : 'N/A' }}</p>
+    </div>
+
+    <div class="facture-info">
+        <div class="left">
+            <h3>Émetteur</h3>
+            <table class="info-table">
+                <tr><td>Cabinet:</td><td>LexPro Juridique</td></tr>
+                <tr><td>Adresse:</td><td>123 Avenue de la Justice</td></tr>
+                <tr><td>Ville:</td><td>75001 Paris</td></tr>
+                <tr><td>Tél:</td><td>01 23 45 67 89</td></tr>
+                <tr><td>Email:</td><td>contact@lexpro.fr</td></tr>
+            </table>
+        </div>
+        <div class="right">
+            <h3>Facturé à</h3>
+            <table class="info-table">
+                <tr><td>Client:</td><td>{{ facture.client.fullName }}</td></tr>
+                <tr><td>Email:</td><td>{{ facture.client.email }}</td></tr>
+                <tr><td>Tél:</td><td>{{ facture.client.telephone }}</td></tr>
+                {% if facture.dossier %}
+                <tr><td>Réf. Dossier:</td><td>{{ facture.dossier.numeroReference }}</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <div class="content">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: center; width: 60px;">Qté</th>
+                    <th style="text-align: right; width: 100px;">Prix U.</th>
+                    <th style="text-align: right; width: 100px;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in facture.articles %}
+                <tr>
+                    <td>{{ article.description }}</td>
+                    <td style="text-align: center;">{{ article.quantite }}</td>
+                    <td style="text-align: right;">{{ article.prixUnitaire|number_format(2, ',', ' ') }} DT</td>
+                    <td style="text-align: right; font-weight: bold;">{{ article.total|number_format(2, ',', ' ') }} DT</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; font-style: italic; color: #999;">Aucun détail de facturation</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <div class="total-row">
+                <div></div>
+                <div style="width: 250px;">
+                    <div style="display: table; width: 100%; margin-bottom: 5px;">
+                        <div class="total-labels">Total HT:</div>
+                        <div class="total-values">{{ facture.montantHt|number_format(2, ',', ' ') }} DT</div>
+                    </div>
+                    <div style="display: table; width: 100%; margin-bottom: 5px;">
+                        <div class="total-labels">TVA ({{ facture.tva }}%):</div>
+                        <div class="total-values">{{ (facture.montantHt * (facture.tva / 100))|number_format(2, ',', ' ') }} DT</div>
+                    </div>
+                    <div style="display: table; width: 100%;" class="total-final">
+                        <div class="total-labels" style="color: #2c3e50;">Total TTC:</div>
+                        <div class="total-values">{{ facture.montantTtc|number_format(2, ',', ' ') }} DT</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; page-break-inside: avoid;">
+        <h3>Informations de paiement</h3>
+        <table class="info-table">
+            <tr><td>Statut:</td><td><strong>{{ facture.status ?: 'N/A' }}</strong></td></tr>
+            <tr><td>Échéance:</td><td>{{ facture.dateEcheance ? facture.dateEcheance|date('d/m/Y') : 'À réception' }}</td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Ce document a été généré électroniquement par LexPro le {{ "now"|date('d/m/Y') }} à {{ "now"|date('H:i') }}</p>
+    </div>
+</body>
+</html>

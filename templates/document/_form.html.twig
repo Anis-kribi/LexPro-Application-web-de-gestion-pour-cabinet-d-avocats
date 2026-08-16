@@ -1,0 +1,57 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="form-section-title"><i class="bi bi-file-earmark-text"></i> Détails du document</div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="form-group">
+            {{ form_label(form.titre) }}
+            {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Contrat de prestation'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.titre) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="form-group">
+            {{ form_label(form.dossier) }}
+            {{ form_widget(form.dossier, {'attr': {'class': 'form-select select2'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.dossier) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            {{ form_label(form.confidentialite) }}
+            {{ form_widget(form.confidentialite, {'attr': {'class': 'form-select'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.confidentialite) }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-2">
+        <div class="form-section-title"><i class="bi bi-upload"></i> Fichier joint</div>
+    </div>
+
+    <div class="col-12">
+        <div class="form-group">
+            {{ form_label(form.file) }}
+            {{ form_widget(form.file, {'attr': {'class': 'form-control'}}) }}
+            <div class="form-text text-muted">Formats supportés: PDF, Word, Excel, JPG, PNG (Max 10MB)</div>
+            <div class="text-danger small mt-1">{{ form_errors(form.file) }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2 border-top mt-4 pt-4">
+    <a href="{{ path('app_document_index') }}" class="btn btn-light">Annuler</a>
+    <button class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>{{ button_label|default('Uploader le document') }}</button>
+</div>
+
+{{ form_end(form) }}

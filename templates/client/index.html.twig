@@ -1,0 +1,178 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Clients — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-people fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Clients</h1>
+                <p class="text-muted mb-0">Gérez votre base de clients et prospects</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+        <a href="{{ path('app_client_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i>Nouveau Client
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+{% for message in app.flashes('danger') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Filter Card ── #}
+<div class="filter-card">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label mb-1">Recherche</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control border-start-0" placeholder="Nom, Email, Entreprise..." value="{{ keyword }}">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1">Type</label>
+            <select name="type" class="form-select">
+                <option value="">Tous les types</option>
+                <option value="particulier" {% if type == 'particulier' %}selected{% endif %}>Particulier</option>
+                <option value="entreprise" {% if type == 'entreprise' %}selected{% endif %}>Entreprise</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label mb-1">Statut</label>
+            <select name="statut" class="form-select">
+                <option value="">Tous</option>
+                <option value="Actif" {% if statut == 'Actif' %}selected{% endif %}>Actif</option>
+                <option value="Prospect" {% if statut == 'Prospect' %}selected{% endif %}>Prospect</option>
+                <option value="Inactif" {% if statut == 'Inactif' %}selected{% endif %}>Inactif</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-filter me-1"></i>Filtrer</button>
+            {% if keyword or type or statut %}
+            <a href="{{ path('app_client_index') }}" class="btn btn-secondary" title="Réinitialiser"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Client</th>
+                        <th>Type / Avocat</th>
+                        <th>Contact</th>
+                        <th>Ville</th>
+                        <th>Statut</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for client in clients %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if client.image %}
+                                    <img src="{{ asset('uploads/clients/' ~ client.image) }}" class="avatar avatar-sm" alt="{{ client.fullName }}">
+                                {% else %}
+                                    <div class="avatar avatar-sm bg-primary bg-opacity-15 text-primary fw-bold">
+                                        {{ client.nom|slice(0,1)|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ client.fullName }}</div>
+                                    <div class="small text-muted">{{ client.taxId }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {% if client.type == 'entreprise' %}bg-secondary{% else %}bg-info text-dark{% endif %} rounded-pill mb-1">
+                                <i class="bi bi-{% if client.type == 'entreprise' %}building{% else %}person{% endif %} me-1"></i>{{ client.type|capitalize }}
+                            </span>
+                            {% if client.avocat %}
+                                <div class="small text-muted"><i class="bi bi-briefcase me-1"></i>Me. {{ client.avocat.prenom }} {{ client.avocat.nom }}</div>
+                            {% else %}
+                                <div class="small text-muted fst-italic">Non assigné</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small"><i class="bi bi-telephone text-muted me-1"></i>{{ client.telephone ?: '—' }}</div>
+                            <div class="small"><i class="bi bi-envelope text-muted me-1"></i>{{ client.email ?: '—' }}</div>
+                        </td>
+                        <td><span class="small fw-semibold">{{ client.ville ?: '—' }}</span></td>
+                        <td>
+                            {% set sClass = {'Actif': 'success', 'Prospect': 'warning', 'Inactif': 'secondary'}[client.statuts] ?? 'secondary' %}
+                            <span class="status-badge status-{{ sClass == 'warning' ? 'warning' : (sClass == 'success' ? 'success' : 'info') }}">
+                                <i class="bi bi-circle-fill" style="font-size:.45rem;"></i> {{ client.statuts }}
+                            </span>
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_client_show', {'id': client.id}) }}" class="crud-btn crud-btn-view" title="Voir"><i class="bi bi-eye"></i></a>
+                                {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+                                <a href="{{ path('app_client_edit', {'id': client.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-people"></i></div>
+                                <h5>Aucun client trouvé</h5>
+                                <p>Ajustez vos filtres ou ajoutez votre premier client.</p>
+                                {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+                                <a href="{{ path('app_client_new') }}" class="btn btn-primary"><i class="bi bi-person-plus-fill me-2"></i>Nouveau Client</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if totalPages > 1 %}
+    <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
+        <small class="text-muted">Page {{ page }} sur {{ totalPages }}</small>
+        <ul class="pagination pagination-sm mb-0">
+            {% if page > 1 %}
+            <li class="page-item"><a class="page-link" href="{{ path('app_client_index', {'page': page-1, 'search': keyword, 'type': type, 'statut': statut}) }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            {% for p in 1..totalPages %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ path('app_client_index', {'page': p, 'search': keyword, 'type': type, 'statut': statut}) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+            {% if page < totalPages %}
+            <li class="page-item"><a class="page-link" href="{{ path('app_client_index', {'page': page+1, 'search': keyword, 'type': type, 'statut': statut}) }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

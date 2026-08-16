@@ -1,0 +1,47 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Nouvelle Facture — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_factures_index') }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_factures_index') }}"><i class="bi bi-receipt me-1"></i>Factures</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nouvelle facture</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Créer une Nouvelle Facture</h1>
+            <p class="text-muted">Établissez un document de facturation pour un client ou un dossier.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-plus-square text-primary me-2"></i>Détails de la facture</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ include('factures/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-lightbulb-fill"></i> Conseils facturation</div>
+            <ul>
+                <li><i class="bi bi-info-circle"></i> Le numéro sera généré automatiquement.</li>
+                <li><i class="bi bi-info-circle"></i> La TVA est calculée automatiquement depuis le HT.</li>
+                <li><i class="bi bi-info-circle"></i> Vous pourrez ajouter les lignes après la création.</li>
+                <li><i class="bi bi-info-circle"></i> Une facture "Brouillon" ne sera pas visible par le client.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

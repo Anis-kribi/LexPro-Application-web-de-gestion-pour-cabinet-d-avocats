@@ -1,0 +1,117 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="form-section-title"><i class="bi bi-folder-fill"></i> Informations Générales</div>
+    </div>
+
+    <div class="col-md-9 mb-2">
+        <div class="form-group">
+            {{ form_label(form.titre) }}
+            {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.titre) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-2">
+        <div class="form-group">
+            {{ form_label(form.numeroReference) }}
+            {{ form_widget(form.numeroReference, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Auto'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.numeroReference) }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="form-section-title"><i class="bi bi-diagram-3"></i> Intervenants & Classification</div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group mb-3">
+            {{ form_label(form.client) }}
+            {{ form_widget(form.client, {'attr': {'class': 'form-select select2'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.client) }}</div>
+        </div>
+        {% if form.avocat is defined %}
+        <div class="form-group">
+            {{ form_label(form.avocat) }}
+            {{ form_widget(form.avocat, {'attr': {'class': 'form-select select2'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.avocat) }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-6">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.statuts) }}
+                    {{ form_widget(form.statuts, {'attr': {'class': 'form-select'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.statuts) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.priorite) }}
+                    {{ form_widget(form.priorite, {'attr': {'class': 'form-select'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.priorite) }}</div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    {{ form_label(form.typeCas) }}
+                    {{ form_widget(form.typeCas, {'attr': {'class': 'form-select'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.typeCas) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="form-section-title"><i class="bi bi-bank"></i> Détails Juridiques</div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="form-group">
+            {{ form_label(form.dateDebut) }}
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar text-muted"></i></span>
+                {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            {{ form_label(form.dateFin) }}
+            <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar-check text-muted"></i></span>
+                {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            {{ form_label(form.nomTribunal) }}
+            {{ form_widget(form.nomTribunal, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            {{ form_label(form.nomAdversaire) }}
+            {{ form_widget(form.nomAdversaire, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+
+    <div class="col-12 mt-3">
+        <div class="form-group">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Résumé des faits et du contexte juridique...'}}) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.description) }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2 border-top mt-4 pt-4">
+    <a href="{{ path('app_dossier_index') }}" class="btn btn-light">Annuler</a>
+    <button class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>{{ button_label|default('Créer le dossier') }}</button>
+</div>
+
+{{ form_end(form) }}

@@ -1,0 +1,151 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}{{ client.fullName }} — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <a href="{{ path('app_client_index') }}" class="btn btn-light border me-3" title="Retour aux clients"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{{ path('app_client_index') }}">Clients</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ client.fullName }}</li>
+                    </ol>
+                </nav>
+                <h1 class="h4 mb-0 fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>Dossier Client</h1>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+            <a href="{{ path('app_client_edit', {'id': client.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            {{ include('client/_delete_form.html.twig') }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# ── Sidebar Infos ── #}
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center p-4">
+                {% if client.image %}
+                    <img src="{{ asset('uploads/clients/' ~ client.image) }}" class="avatar avatar-lg mx-auto mb-3" style="width:100px;height:100px;font-size:2.5rem;" alt="{{ client.fullName }}">
+                {% else %}
+                    <div class="avatar bg-primary bg-opacity-10 text-primary fw-bold mx-auto mb-3" style="width:100px;height:100px;font-size:3rem;">
+                        {{ client.nom|slice(0,1)|upper }}
+                    </div>
+                {% endif %}
+                <h4 class="fw-bold mb-1">{{ client.fullName }}</h4>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark border"><i class="bi bi-building me-1"></i>{{ client.type|capitalize }}</span>
+                    {% set sClass = {'Actif': 'success', 'Prospect': 'warning', 'Inactif': 'secondary'}[client.statuts] ?? 'secondary' %}
+                    <span class="badge bg-{{ sClass }} bg-opacity-25 text-{{ sClass }} ms-1">{{ client.statuts }}</span>
+                </div>
+            </div>
+            
+            <div class="border-top p-4">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">Coordonnées</h6>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-telephone me-2"></i>Téléphone</span>
+                    <span class="info-value">{{ client.telephone ?: '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-envelope me-2"></i>Email</span>
+                    <span class="info-value"><a href="mailto:{{ client.email }}" class="text-decoration-none">{{ client.email ?: '—' }}</a></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-geo-alt me-2"></i>Ville</span>
+                    <span class="info-value">{{ client.ville ?: '—' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-map me-2"></i>Adresse</span>
+                    <span class="info-value text-end text-wrap" style="max-width: 150px;">{{ client.adresse ?: '—' }}</span>
+                </div>
+                {% if client.taxId %}
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-hash me-2"></i>Tax ID</span>
+                    <span class="info-value">{{ client.taxId }}</span>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="info-label"><i class="bi bi-briefcase me-2"></i>Avocat réf.</span>
+                    <span class="info-value">{{ client.avocat ? client.avocat.fullName : '—' }}</span>
+                </div>
+            </div>
+            
+            {% if client.remarques %}
+            <div class="card-footer bg-warning bg-opacity-10 border-top-0 p-4">
+                <h6 class="text-warning fw-bold small text-uppercase mb-2"><i class="bi bi-sticky me-1"></i> Remarques internes</h6>
+                <p class="small text-dark mb-0 fst-italic">{{ client.remarques|nl2br }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── Main Content (Dossiers Tabs) ── #}
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100 tab-card">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0">Dossiers Associés</h5>
+                    {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+                    <a href="{{ path('app_dossier_new') }}?client={{ client.id }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Nouveau</a>
+                    {% endif %}
+                </div>
+                <ul class="nav nav-tabs crud-tabs mt-3" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dossiers" type="button">Tous ({{ client.dossiers|length }})</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="dossiers" role="tabpanel">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Référence</th>
+                                    <th>Titre</th>
+                                    <th>Statut</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dossier in client.dossiers %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary">{{ dossier.numeroReference }}</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ dossier.titre }}</div>
+                                        <div class="small text-muted">{{ dossier.typeCas }}</div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ dossier.statuts }}</span></td>
+                                    <td class="text-end pe-4">
+                                        <div class="crud-actions">
+                                            <a href="{{ path('app_dossier_show', {id: dossier.id}) }}" class="crud-btn crud-btn-view"><i class="bi bi-eye"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="crud-empty py-5">
+                                            <i class="bi bi-folder-x fs-1 text-muted mb-3 d-block"></i>
+                                            <h6 class="text-muted fw-normal">Aucun dossier rattaché à ce client.</h6>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

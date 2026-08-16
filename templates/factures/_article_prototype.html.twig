@@ -1,0 +1,18 @@
+<td class="align-middle">
+    {{ form_widget(item.description) }}
+    <div class="text-danger small">{{ form_errors(item.description) }}</div>
+</td>
+<td class="align-middle">
+    {{ form_widget(item.quantite) }}
+    <div class="text-danger small">{{ form_errors(item.quantite) }}</div>
+</td>
+<td class="align-middle">
+    {{ form_widget(item.prixUnitaire) }}
+    <div class="text-danger small">{{ form_errors(item.prixUnitaire) }}</div>
+</td>
+<td class="align-middle text-end fw-bold text-success bg-light line-total" style="vertical-align: middle !important;">
+    0.00 DT
+</td>
+<td class="text-center align-middle">
+    <button type="button" class="btn btn-outline-danger btn-sm rounded-circle remove-article-btn"><i class="bi bi-trash"></i></button>
+</td>

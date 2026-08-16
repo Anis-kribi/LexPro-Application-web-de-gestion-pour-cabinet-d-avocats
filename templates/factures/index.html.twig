@@ -1,0 +1,165 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Factures — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-receipt fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Factures</h1>
+                <p class="text-muted mb-0">Gestion de la facturation et suivi des paiements</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_AVOCAT') %}
+        <a href="{{ path('app_factures_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Nouvelle Facture
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Stat Mini Cards ── #}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-mini">
+            <div class="stat-mini-icon bg-success bg-opacity-10 text-success"><i class="bi bi-graph-up-arrow"></i></div>
+            <div>
+                <div class="stat-mini-value text-dark">{{ totalMois|number_format(2, ',', ' ') }} <small class="fs-6 text-muted">DT</small></div>
+                <div class="stat-mini-label">Chiffre d'affaires (Mois)</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-mini">
+            <div class="stat-mini-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                {% set totalAttente = 0 %}
+                {% for st in stats %}{% if st.status == 'En attente' %}{% set totalAttente = st.total %}{% endif %}{% endfor %}
+                <div class="stat-mini-value text-dark">{{ totalAttente|number_format(2, ',', ' ') }} <small class="fs-6 text-muted">DT</small></div>
+                <div class="stat-mini-label">En attente de paiement</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-mini">
+            <div class="stat-mini-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-mini-value text-dark">{{ enRetard }} <small class="fs-6 text-muted">factures</small></div>
+                <div class="stat-mini-label text-danger">Factures en retard</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Filter Card ── #}
+<div class="filter-card p-0 overflow-hidden">
+    <div class="bg-light px-3 py-2">
+        <ul class="nav crud-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link {% if not statut %}active{% endif %}" href="{{ path('app_factures_index') }}">Toutes</a>
+            </li>
+            {% for st in ['Brouillon', 'En attente', 'Payée', 'Impayée', 'Annulée'] %}
+            <li class="nav-item">
+                <a class="nav-link {% if statut == st %}active{% endif %}" href="{{ path('app_factures_index', {'statut': st}) }}">
+                    {{ st }}
+                    {% for stat in stats %}
+                        {% if stat.status == st %}<span class="badge bg-secondary bg-opacity-25 text-dark ms-1 rounded-pill">{{ stat.nb }}</span>{% endif %}
+                    {% endfor %}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Numéro</th>
+                        <th>Client / Dossier</th>
+                        <th>Dates</th>
+                        <th class="text-end">Montant TTC</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for facture in factures %}
+                    <tr>
+                        <td class="ps-4 fw-bold">
+                            <a href="{{ path('app_factures_show', {'id': facture.id}) }}" class="text-decoration-none text-primary">{{ facture.numeroFacture }}</a>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ facture.client.fullName }}</div>
+                            {% if facture.dossier %}
+                            <div class="small text-muted"><i class="bi bi-folder2 text-warning me-1"></i>{{ facture.dossier.numeroReference }}</div>
+                            {% else %}
+                            <div class="small text-muted fst-italic">Sans dossier</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small text-muted mb-1">Créée: <span class="fw-semibold text-dark">{{ facture.dateEmission|date('d/m/Y') }}</span></div>
+                            {% if facture.dateEcheance %}
+                                {% set retard = facture.dateEcheance < date() and facture.status == 'En attente' %}
+                                <div class="small {% if retard %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                    Échéance: <span class="fw-semibold">{{ facture.dateEcheance|date('d/m/Y') }}</span>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold text-dark fs-6">{{ facture.montantTtc|number_format(2, ',', ' ') }} <small class="text-muted fw-normal">DT</small></td>
+                        <td class="text-center">
+                            {% set sClasses = {'Brouillon': 'secondary', 'En attente': 'warning', 'Payée': 'success', 'Impayée': 'danger', 'Annulée': 'dark'} %}
+                            {% set badgeCol = sClasses[facture.status] ?? 'secondary' %}
+                            <span class="status-badge status-{{ badgeCol == 'warning' ? 'warning' : (badgeCol == 'success' ? 'success' : (badgeCol == 'danger' ? 'danger' : 'info')) }}">
+                                {{ facture.status }}
+                            </span>
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_factures_show', {'id': facture.id}) }}" class="crud-btn crud-btn-view" title="Voir"><i class="bi bi-eye"></i></a>
+                                {% if is_granted('ROLE_AVOCAT') %}
+                                <a href="{{ path('app_factures_edit', {'id': facture.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+                                <a href="{{ path('app_factures_pdf', {'id': facture.id}) }}" class="crud-btn crud-btn-download" title="PDF"><i class="bi bi-download"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-receipt"></i></div>
+                                <h5>Aucune facture trouvée</h5>
+                                <p>Commencez à facturer vos clients en créant votre première facture.</p>
+                                {% if is_granted('ROLE_AVOCAT') %}
+                                <a href="{{ path('app_factures_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nouvelle Facture</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

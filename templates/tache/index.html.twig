@@ -1,0 +1,180 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Tâches — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-check2-square fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Tâches</h1>
+                <p class="text-muted mb-0">Suivi des échéances et actions à réaliser</p>
+            </div>
+        </div>
+        <a href="{{ path('app_tache_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i>Nouvelle Tâche
+        </a>
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Stat Mini Cards ── #}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <a href="{{ path('app_tache_index') }}" class="text-decoration-none">
+            <div class="stat-mini {% if not status %}border-primary shadow-md{% endif %}">
+                <div class="stat-mini-icon bg-secondary bg-opacity-10 text-secondary"><i class="bi bi-list-task"></i></div>
+                <div>
+                    <div class="stat-mini-value text-dark">{{ statsByStatut|reduce((carry, v) => carry + v, 0) }}</div>
+                    <div class="stat-mini-label">Toutes les tâches</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('app_tache_index', {'status': 'À faire'}) }}" class="text-decoration-none">
+            <div class="stat-mini {% if status == 'À faire' %}border-secondary shadow-md{% endif %}">
+                <div class="stat-mini-icon bg-secondary bg-opacity-10 text-secondary"><i class="bi bi-circle"></i></div>
+                <div>
+                    <div class="stat-mini-value text-dark">{{ statsByStatut['À faire'] ?? 0 }}</div>
+                    <div class="stat-mini-label text-secondary">À faire</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('app_tache_index', {'status': 'En cours'}) }}" class="text-decoration-none">
+            <div class="stat-mini {% if status == 'En cours' %}border-primary shadow-md{% endif %}">
+                <div class="stat-mini-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-play-circle"></i></div>
+                <div>
+                    <div class="stat-mini-value text-dark">{{ statsByStatut['En cours'] ?? 0 }}</div>
+                    <div class="stat-mini-label text-primary">En cours</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ path('app_tache_index', {'status': 'Terminée'}) }}" class="text-decoration-none">
+            <div class="stat-mini {% if status == 'Terminée' %}border-success shadow-md{% endif %}">
+                <div class="stat-mini-icon bg-success bg-opacity-10 text-success"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="stat-mini-value text-dark">{{ statsByStatut['Terminée'] ?? 0 }}</div>
+                    <div class="stat-mini-label text-success">Terminées</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Statut</th>
+                        <th>Tâche / Priorité</th>
+                        <th>Dossier Lié</th>
+                        <th>Assigné à / Échéance</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for tache in taches %}
+                    <tr>
+                        <td class="ps-4" style="width: 60px;">
+                            <form action="{{ path('app_tache_change_status', {'id': tache.id, 'status': (tache.status == 'Terminée' ? 'À faire' : 'Terminée')}) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-link p-0 text-decoration-none" title="Changer le statut">
+                                    {% if tache.status == 'À faire' %}
+                                        <i class="bi bi-circle text-muted fs-4"></i>
+                                    {% elseif tache.status == 'En cours' %}
+                                        <i class="bi bi-play-circle text-primary fs-4"></i>
+                                    {% elseif tache.status == 'Terminée' %}
+                                        <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                    {% elseif tache.status == 'Annulée' %}
+                                        <i class="bi bi-x-circle-fill text-danger fs-4"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="fw-bold {% if tache.status == 'Terminée' %}text-decoration-line-through text-muted{% else %}text-dark{% endif %}">
+                                {{ tache.titre }}
+                            </div>
+                            {% set prioClass = {'Basse': 'secondary', 'Normale': 'info', 'Haute': 'warning', 'Urgente': 'danger'}[tache.priorite] ?? 'secondary' %}
+                            <span class="badge bg-{{ prioClass }} bg-opacity-25 text-{{ prioClass }} border border-{{ prioClass }} rounded-pill mt-1" style="font-size: 0.65em;">
+                                <i class="bi bi-flag-fill me-1"></i>{{ tache.priorite }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_dossier_show', {'id': tache.dossier.id}) }}" class="fw-semibold text-decoration-none"><i class="bi bi-folder2 text-warning me-1"></i>{{ tache.dossier.numeroReference }}</a>
+                            <div class="small text-muted">{{ tache.dossier.client.fullName }}</div>
+                        </td>
+                        <td>
+                            {% if tache.assigneA %}
+                            <div class="d-flex align-items-center mb-1">
+                                {% if tache.assigneA.image %}
+                                    <img src="{{ asset('uploads/users/' ~ tache.assigneA.image) }}" class="avatar rounded-circle me-2" style="width: 20px; height: 20px;" alt="{{ tache.assigneA.fullName }}">
+                                {% else %}
+                                    <div class="avatar bg-light text-primary rounded-circle me-2 fw-bold" style="width: 20px; height: 20px; font-size: 0.6em;">
+                                        {{ tache.assigneA.nom|slice(0,1)|upper }}
+                                    </div>
+                                {% endif %}
+                                <span class="small fw-semibold text-dark">{{ tache.assigneA.fullName }}</span>
+                            </div>
+                            {% else %}
+                            <div class="small text-muted fst-italic mb-1">Non assigné</div>
+                            {% endif %}
+                            
+                            {% if tache.dateEcheance %}
+                                {% set retard = tache.isEnRetard and tache.status != 'Terminée' %}
+                                <div class="small {% if retard %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                    <i class="bi bi-calendar me-1"></i>{{ tache.dateEcheance|date('d/m/Y') }}
+                                </div>
+                            {% else %}
+                                <div class="small text-muted">—</div>
+                            {% endif %}
+                        </td>
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_tache_show', {'id': tache.id}) }}" class="crud-btn crud-btn-view" title="Voir"><i class="bi bi-eye"></i></a>
+                                <a href="{{ path('app_tache_edit', {'id': tache.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                <form method="post" action="{{ path('app_tache_delete', {'id': tache.id}) }}" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
+                                    <button class="crud-btn crud-btn-delete" title="Supprimer"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-check2-square"></i></div>
+                                <h5>Aucune tâche trouvée</h5>
+                                <p>Toutes vos tâches sont à jour, ou essayez de changer de filtre.</p>
+                                <a href="{{ path('app_tache_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Nouvelle Tâche</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

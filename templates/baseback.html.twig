@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LexPro - Gestion Juridique{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="/backend/css/style.css?v={{ 'now'|date('U') }}" rel="stylesheet">
+    {% block stylesheets %}
+    {% endblock %}
+    <script>
+        // Apply theme and sidebar state before DOM load to prevent flickering
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-collapsed');
+        }
+    </script>
+</head>
+
+<body class="app-layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="mainSidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <a href="{{path('backend_dashboard')}}" class="sidebar-logo-link">
+                <img src="/backend/images/LexPro.png" alt="LexPro Logo" class="sidebar-logo-img">
+            </a>
+        </div>
+
+        <!-- Sidebar Navigation Body -->
+        <div class="sidebar-body">
+            <!-- Main Section -->
+            <a href="{{path('backend_dashboard')}}" class="sidebar-link{% if app.request.get('_route') == 'backend_dashboard' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                <span class="sidebar-text">{{ 'menu.dashboard'|trans }}</span>
+            </a>
+
+            {# ===== ADMINISTRATION (ADMIN only) ===== #}
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="sidebar-section-label">{{ 'menu.admin'|trans }}</div>
+            <a href="{{ path('app_user_index') }}" class="sidebar-link{% if app.request.get('_route') starts with 'app_user' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-people-fill"></i></span>
+                <span class="sidebar-text">{{ 'menu.users'|trans }}</span>
+            </a>
+            {% endif %}
+
+            {# ===== GESTION (AVOCAT + ADMIN) ===== #}
+            {% if is_granted('ROLE_AVOCAT') %}
+            <div class="sidebar-section-label">{{ 'menu.management'|trans }}</div>
+            <a href="{{path('app_dossier_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_dossier' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-folder2-open"></i></span>
+                <span class="sidebar-text">{{ 'menu.cases'|trans }}</span>
+            </a>
+            <a href="{{path('app_factures_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_factures' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-receipt"></i></span>
+                <span class="sidebar-text">{{ 'menu.invoices'|trans }}</span>
+            </a>
+            {% endif %}
+
+            {# ===== SUIVI (all roles) ===== #}
+            <div class="sidebar-section-label">{{ 'menu.tracking'|trans }}</div>
+            <a href="{{path('app_client_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_client' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-people"></i></span>
+                <span class="sidebar-text">{{ 'menu.clients'|trans }}</span>
+            </a>
+            {% if is_granted('ROLE_AVOCAT') %}
+            <a href="{{path('app_rendez_vous_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_rendez_vous' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-calendar-event"></i></span>
+                <span class="sidebar-text">{{ 'menu.appointments'|trans }}</span>
+            </a>
+            {% endif %}
+            <a href="{{path('app_document_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_document' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-file-earmark-text"></i></span>
+                <span class="sidebar-text">{{ 'menu.documents'|trans }}</span>
+            </a>
+            <a href="{{path('app_tache_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_tache' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-check2-square"></i></span>
+                <span class="sidebar-text">{{ 'menu.tasks'|trans }}</span>
+            </a>
+            {% if is_granted('ROLE_AVOCAT') %}
+            <a href="{{path('app_entree_temps_index')}}" class="sidebar-link{% if app.request.get('_route') starts with 'app_entree_temps' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-clock-history"></i></span>
+                <span class="sidebar-text">{{ 'menu.time_entries'|trans }}</span>
+            </a>
+            {% endif %}
+
+            {# ===== PARAMETRES ===== #}
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="sidebar-divider"></div>
+            <a href="{{ path('app_settings') }}" class="sidebar-link{% if app.request.get('_route') starts with 'app_settings' %} active{% endif %}">
+                <span class="sidebar-icon"><i class="bi bi-gear-fill"></i></span>
+                <span class="sidebar-text">{{ 'menu.settings'|trans }}</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- User Profile Footer -->
+        <div class="sidebar-footer">
+            <a href="{{ path('app_profile') }}" class="sidebar-user-avatar" title="Mon Profil">
+                {% if app.user and app.user.image %}
+                    <img src="{{ asset('uploads/users/' ~ app.user.image) }}" alt="User">
+                {% else %}
+                    <img src="{{ app.user and app.user.image ? asset('uploads/users/' ~ app.user.image) : 'https://ui-avatars.com/api/?name=' ~ (app.user ? app.user.getFullName()|url_encode : 'User') ~ '&background=6366f1&color=fff' }}" alt="User">
+                {% endif %}
+            </a>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name">{{ app.user ? app.user.getFullName() : 'Utilisateur' }}</div>
+                <div class="sidebar-user-role">
+                    {% if is_granted('ROLE_ADMIN') %}Administrateur
+                    {% elseif is_granted('ROLE_AVOCAT') %}Avocat
+                    {% else %}Assistant{% endif %}
+                </div>
+            </div>
+            <a href="{{ path('app_logout') }}" class="sidebar-logout-btn" title="Déconnexion">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="d-flex align-items-center">
+                <!-- Mobile Toggle -->
+                <button class="btn btn-link topbar-icon-btn d-lg-none me-3 hover-scale" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <!-- Desktop Toggle -->
+                <button class="btn btn-link topbar-icon-btn d-none d-lg-flex me-3 hover-scale" id="sidebarToggleDesktop" title="Afficher/Masquer la sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h5 class="mb-0 d-none d-lg-block fw-semibold">{% block page_title %}<i class="bi bi-grid-1x2-fill me-2 text-primary"></i>Vue d'ensemble{% endblock %}</h5>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <form action="{{ path('app_global_search') }}" method="GET" class="d-none d-md-flex m-0 position-relative topbar-search" style="width: 300px;">
+                    <input type="text" name="q" class="form-control rounded-pill ps-4 pe-5 py-2 border-0 search-input" placeholder="{{ 'topbar.search_placeholder'|trans }}" value="{{ app.request.query.get('q') }}" style="background: var(--g100); transition: all 0.3s ease; font-size: 0.9rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                    <button type="submit" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent text-primary hover-scale" style="padding-right: 1.25rem;">
+                        <i class="bi bi-search fs-6"></i>
+                    </button>
+                </form>
+                
+                <!-- Global Theme Toggle -->
+                <button class="btn btn-light position-relative p-2 rounded-circle border-0 d-flex align-items-center justify-content-center" id="globalThemeToggle" title="Basculer le mode sombre" style="width: 38px; height: 38px; transition: all 0.3s ease;">
+                    <i class="bi bi-moon-stars fs-5" id="globalThemeIcon"></i>
+                </button>
+
+                {% if is_granted('ROLE_ADMIN') %}
+                <div class="dropdown" id="notification-dropdown">
+                    <button class="btn btn-light position-relative p-2 rounded-circle" data-bs-toggle="dropdown" id="notificationBellBtn">
+                        <i class="bi bi-bell"></i>
+                        <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; transform: translate(-30%, 30%) !important; display: none;">
+                            0
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2 shadow" style="min-width: 320px;" id="notification-list">
+                        <li>
+                            <div class="dropdown-header d-flex justify-content-between align-items-center mb-1 border-bottom pb-2">
+                                <span class="fw-bold text-dark">{{ 'topbar.notifications'|trans }}</span>
+                                <button class="btn btn-sm btn-link text-decoration-none p-0 text-primary" id="mark-all-read-btn" style="font-size: 0.75rem; display: none;">{{ 'topbar.mark_read'|trans }}</button>
+                            </div>
+                        </li>
+                        <div id="notification-items-container" style="max-height: 350px; overflow-y: auto;">
+                            <li><span class="dropdown-item text-center text-muted small py-3">{{ 'topbar.no_notifications'|trans }}</span></li>
+                        </div>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown">
+                        {% if app.user and app.user.image %}
+                            <img src="{{ asset('uploads/users/' ~ app.user.image) }}" alt="User" class="avatar avatar-sm me-2">
+                        {% else %}
+                            <img src="{{ app.user and app.user.image ? asset('uploads/users/' ~ app.user.image) : 'https://ui-avatars.com/api/?name=' ~ (app.user ? app.user.getFullName()|url_encode : 'User') ~ '&background=6366f1&color=fff' }}" alt="User"
+                                class="avatar avatar-sm me-2">
+                        {% endif %}
+                        <span class="d-none d-md-block small fw-bold topbar-username">{{ app.user ? app.user.getFullName() : 'Utilisateur' }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li>
+                            <div class="px-3 py-2 border-bottom">
+                                <small class="text-muted d-block">{{ app.user ? app.user.email : '' }}</small>
+                                <span class="badge mt-1
+                                    {% if is_granted('ROLE_ADMIN') %}bg-danger
+                                    {% elseif is_granted('ROLE_AVOCAT') %}bg-primary
+                                    {% else %}bg-success{% endif %}">
+                                    {% if is_granted('ROLE_ADMIN') %}Administrateur
+                                    {% elseif is_granted('ROLE_AVOCAT') %}Avocat
+                                    {% else %}Assistant{% endif %}
+                                </span>
+                            </div>
+                        </li>
+                        <li><a class="dropdown-item" href="{{ path('app_profile') }}"><i class="bi bi-person me-2"></i>{{ 'menu.my_profile'|trans }}</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <li><a class="dropdown-item" href="{{ path('app_settings') }}"><i class="bi bi-gear me-2"></i>{{ 'menu.settings'|trans }}</a></li>
+                        {% endif %}
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="{{ path('app_logout') }}"><i class="bi bi-box-arrow-left me-2"></i>{{ 'menu.logout'|trans }}</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            {% block body %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/backend/js/main.js"></script>
+    <script>
+        // Mock Chart Data
+        const ctx = document.getElementById('casesChart');
+        if (ctx) {
+            const myChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                    datasets: [{
+                        label: 'Dossiers Ouverts',
+                        data: [12, 19, 15, 25, 22, 30],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Dossiers Clôturés',
+                        data: [8, 12, 10, 15, 20, 18],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    {% if is_granted('ROLE_ADMIN') %}
+    <script src="/backend/js/notifications.js"></script>
+    {% endif %}
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleThemeBtn = document.getElementById('globalThemeToggle');
+            if (toggleThemeBtn) {
+                const icon = document.getElementById('globalThemeIcon');
+                
+                const updateThemeIcon = (theme) => {
+                    if (theme === 'dark') {
+                        icon.classList.remove('bi-moon-stars');
+                        icon.classList.add('bi-sun-fill', 'text-warning');
+                    } else {
+                        icon.classList.remove('bi-sun-fill', 'text-warning');
+                        icon.classList.add('bi-moon-stars');
+                    }
+                };
+
+                // Set initial icon state based on current dark mode
+                const baseTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                updateThemeIcon(baseTheme);
+                if (baseTheme === 'dark') {
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                }
+
+                toggleThemeBtn.addEventListener('click', () => {
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    if (currentTheme === 'dark') {
+                        document.documentElement.removeAttribute('data-theme');
+                        document.documentElement.setAttribute('data-bs-theme', 'light');
+                        localStorage.setItem('theme', 'light');
+                        updateThemeIcon('light');
+                        // Update settings switch if on the settings page
+                        const settingsSwitch = document.getElementById('darkModeSwitchSettings');
+                        if (settingsSwitch) { settingsSwitch.checked = false; document.getElementById('darkModeLabelSettings').innerText = "Mode Sombre : Désactivé"; }
+                    } else {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        document.documentElement.setAttribute('data-bs-theme', 'dark');
+                        localStorage.setItem('theme', 'dark');
+                        updateThemeIcon('dark');
+                        // Update settings switch if on the settings page
+                        const settingsSwitch = document.getElementById('darkModeSwitchSettings');
+                        if (settingsSwitch) { settingsSwitch.checked = true; document.getElementById('darkModeLabelSettings').innerText = "Mode Sombre : Activé"; }
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+
+</html>

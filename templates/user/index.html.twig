@@ -1,0 +1,113 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Utilisateurs — LexPro{% endblock %}
+
+{% block body %}
+{# ── Page Header ── #}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-shield-lock fs-3"></i>
+            </div>
+            <div>
+                <h1 class="mb-0 fw-bold">Utilisateurs</h1>
+                <p class="text-muted mb-0">Gestion des accès et rôles du cabinet</p>
+            </div>
+        </div>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_user_new') }}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus me-2"></i>Nouvel Utilisateur
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ── Flash Messages ── #}
+<div class="flash-container">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+</div>
+
+{# ── Data Table ── #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Utilisateur</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <th class="text-end pe-4">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                {% if user.image %}
+                                    <img src="{{ asset('uploads/users/' ~ user.image) }}" class="avatar me-3" alt="{{ user.fullName }}">
+                                {% else %}
+                                    <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle me-3 fw-bold">
+                                        {{ user.prenom|slice(0,1)|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold text-dark">{{ user.prenom }} {{ user.nom }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ user.email }}" class="text-decoration-none text-muted"><i class="bi bi-envelope me-1"></i>{{ user.email }}</a>
+                        </td>
+                        <td>
+                            {% set roleStr = 'Secrétaire' %}
+                            {% set roleClass = 'secondary' %}
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                {% set roleStr = 'Administrateur' %}
+                                {% set roleClass = 'danger' %}
+                            {% elseif 'ROLE_AVOCAT' in user.roles %}
+                                {% set roleStr = 'Avocat' %}
+                                {% set roleClass = 'primary' %}
+                            {% endif %}
+                            <span class="badge bg-{{ roleClass }} bg-opacity-10 text-{{ roleClass }} border border-{{ roleClass }} rounded-pill px-2 py-1">
+                                {{ roleStr }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Actif</span>
+                        </td>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <td class="pe-4">
+                            <div class="crud-actions">
+                                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="crud-btn crud-btn-edit" title="Modifier"><i class="bi bi-pencil"></i></a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="crud-empty">
+                                <div class="crud-empty-icon"><i class="bi bi-shield-x"></i></div>
+                                <h5>Aucun utilisateur trouvé</h5>
+                                <p>Aucun compte n'a été créé.</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

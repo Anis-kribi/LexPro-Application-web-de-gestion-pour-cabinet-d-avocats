@@ -1,0 +1,78 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Détail Document - LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_document_index') }}">Documents</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ document.titre }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-file-earmark-text text-primary me-2"></i>{{ document.titre }}
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-success">
+                <i class="bi bi-download me-2"></i>Télécharger
+            </a>
+            <a href="{{ path('app_document_edit', {'id': document.id}) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 fw-bold">Informations</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tbody>
+                        <tr>
+                            <th class="text-muted" style="width: 35%">Type de fichier</th>
+                            <td><span class="badge bg-light text-dark border">{{ document.type }}</span></td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Confidentialité</th>
+                            <td>
+                                {% set confClass = {'Public': 'success', 'Interne': 'info', 'Confidentiel': 'warning', 'Secret': 'danger'} %}
+                                <span class="badge bg-{{ confClass[document.confidentialite] ?? 'secondary' }}"><i class="bi bi-shield-lock me-1"></i>{{ document.confidentialite }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Nom original</th>
+                            <td class="text-break">{{ document.nomOriginal }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Dossier lié</th>
+                            <td>
+                                {% if document.dossier %}
+                                    <a href="{{ path('app_dossier_show', {id: document.dossier.id}) }}">{{ document.dossier.numeroReference }}</a>
+                                {% else %}
+                                    <span class="text-muted fst-italic">Non attaché à un dossier</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Ajouté par</th>
+                            <td>{{ document.telechargepar ? document.telechargepar.fullName : 'Inconnu' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Date d'ajout</th>
+                            <td>{{ document.createdAt|date('d/m/Y H:i') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

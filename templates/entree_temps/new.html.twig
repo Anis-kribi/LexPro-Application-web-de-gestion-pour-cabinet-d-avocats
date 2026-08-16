@@ -1,0 +1,47 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Saisir du Temps — LexPro{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ path('app_entree_temps_index') }}" class="btn btn-light border" title="Retour">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('app_entree_temps_index') }}"><i class="bi bi-clock-history me-1"></i>Temps</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nouveau</li>
+                </ol>
+            </nav>
+            <h1 class="mb-0 fw-bold">Saisir du Temps</h1>
+            <p class="text-muted">Enregistrez le temps passé sur un dossier pour la facturation.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-stopwatch text-primary me-2"></i>Détails de la saisie</h6>
+            </div>
+            <div class="card-body p-4">
+                {{ include('entree_temps/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="help-card mb-4">
+            <div class="help-card-title"><i class="bi bi-stopwatch"></i> Suivi du Temps</div>
+            <ul>
+                <li><i class="bi bi-info-circle"></i> Saisissez la durée en <b>heures</b> (ex: 1.5 pour 1h30).</li>
+                <li><i class="bi bi-info-circle"></i> Soyez précis dans la description — cela aidera lors de la facturation.</li>
+                <li><i class="bi bi-info-circle"></i> Les entrées facturables seront prises en compte dans le calcul des honoraires.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

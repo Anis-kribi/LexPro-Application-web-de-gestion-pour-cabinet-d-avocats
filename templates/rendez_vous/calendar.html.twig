@@ -1,0 +1,268 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Calendrier des Rendez-vous — LexPro{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* ===== LUXURY CALENDAR DESIGN ===== */
+        .fc {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #1e293b;
+        }
+        
+        /* Remove outer borders for a cleaner look */
+        .fc-scrollgrid {
+            border: none !important;
+        }
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: #f1f5f9;
+        }
+
+        /* Toolbar (Header) */
+        .fc .fc-toolbar-title {
+            font-size: 1.4rem !important;
+            font-weight: 700 !important;
+            color: #0f172a;
+            text-transform: capitalize;
+        }
+        .fc .fc-button-primary {
+            background-color: transparent !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #475569 !important;
+            font-weight: 500 !important;
+            text-transform: capitalize;
+            box-shadow: none !important;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            padding: 0.4rem 1rem !important;
+        }
+        .fc .fc-button-primary:not(:disabled):hover {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+        .fc .fc-button-primary:not(:disabled):active, 
+        .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #e0e7ff !important;
+            border-color: #c7d2fe !important;
+            color: #4338ca !important;
+            box-shadow: none !important;
+        }
+        .fc .fc-button-group > .fc-button {
+            border-radius: 0;
+            margin-left: -1px;
+        }
+        .fc .fc-button-group > .fc-button:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+            margin-left: 0;
+        }
+        .fc .fc-button-group > .fc-button:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+        /* Headers & Days */
+        .fc .fc-col-header-cell {
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .fc .fc-col-header-cell-cushion {
+            padding: 16px 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            text-decoration: none;
+        }
+        .fc .fc-daygrid-day-number {
+            font-weight: 500;
+            color: #334155;
+            padding: 8px 12px;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .fc .fc-day-today {
+            background-color: transparent !important;
+        }
+        .fc .fc-day-today .fc-daygrid-day-number {
+            color: #ffffff;
+            background: #4f46e5;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Events */
+        .fc-event {
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 3px 6px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            margin: 2px 4px !important;
+            cursor: pointer;
+            box-shadow: none !important;
+            transition: opacity 0.2s;
+        }
+        .fc-event:hover {
+            opacity: 0.9;
+        }
+        .fc-event-main {
+            color: #ffffff;
+        }
+        .fc-h-event .fc-event-main-frame {
+            align-items: center;
+        }
+        
+        /* TimeGrid (Week/Day view) specific */
+        .fc .fc-timegrid-slot {
+            height: 3em; /* taller slots */
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .fc .fc-timegrid-axis-cushion {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            white-space: nowrap !important; /* Fix wrapping */
+            padding: 0 8px !important;
+        }
+        .fc .fc-timegrid-slot-label-cushion {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            padding-right: 12px;
+        }
+
+        /* ===== DARK MODE SUPPORT ===== */
+        [data-theme="dark"] .fc {
+            color: #f1f5f9;
+        }
+        [data-theme="dark"] .fc .fc-toolbar-title {
+            color: #f8fafc;
+        }
+        [data-theme="dark"] .fc .fc-button-primary {
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+        }
+        [data-theme="dark"] .fc .fc-button-primary:not(:disabled):hover {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        [data-theme="dark"] .fc .fc-button-primary:not(:disabled):active,
+        [data-theme="dark"] .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #4f46e5 !important;
+            border-color: #4f46e5 !important;
+            color: #ffffff !important;
+        }
+        [data-theme="dark"] .fc-theme-standard td, 
+        [data-theme="dark"] .fc-theme-standard th {
+            border-color: #1e293b;
+        }
+        [data-theme="dark"] .fc .fc-col-header-cell {
+            background-color: #0f172a;
+            border-bottom-color: #1e293b;
+        }
+        [data-theme="dark"] .fc .fc-col-header-cell-cushion {
+            color: #94a3b8;
+        }
+        [data-theme="dark"] .fc .fc-daygrid-day-number {
+            color: #cbd5e1;
+        }
+        [data-theme="dark"] .fc .fc-timegrid-slot {
+            border-bottom-color: #1e293b;
+        }
+        [data-theme="dark"] .fc .fc-timegrid-axis-cushion,
+        [data-theme="dark"] .fc .fc-timegrid-slot-label-cushion {
+            color: #64748b;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ path('backend_dashboard') }}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Calendrier</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 fw-bold"><i class="bi bi-calendar3 text-primary me-2"></i>Mon Calendrier</h1>
+            <p class="text-muted mb-0">Vue globale de tous vos rendez-vous</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="btn-group" role="group">
+                <a href="{{ path('app_rendez_vous_index') }}" class="btn btn-outline-primary" title="Vue Liste">
+                    <i class="bi bi-list-ul"></i> Liste
+                </a>
+                <a href="{{ path('app_rendez_vous_calendar') }}" class="btn btn-primary active" title="Vue Calendrier">
+                    <i class="bi bi-calendar3"></i> Calendrier
+                </a>
+            </div>
+            {% if is_granted('ROLE_AVOCAT') or is_granted('ROLE_ASSISTANT') %}
+            <a href="{{ path('app_rendez_vous_new') }}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>Nouveau RDV
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-body p-0">
+        <div id="calendar" style="padding: 1.5rem;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- FullCalendar CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/fr.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                themeSystem: 'standard', /* Switching back to standard for cleaner custom CSS */
+                timeZone: 'Africa/Tunis',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Aujourd\'hui',
+                    month: 'Mois',
+                    week: 'Semaine',
+                    day: 'Jour'
+                },
+                allDayText: 'Journée', /* Changed from Toute la journée */
+                events: "{{ path('app_rendez_vous_events') }}",
+                height: 750,
+                nowIndicator: true,
+                dayMaxEvents: true,
+                slotMinTime: '08:00:00', /* Start day at 8 AM */
+                slotMaxTime: '20:00:00', /* End day at 8 PM */
+                expandRows: true, /* Make rows fill the height */
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    meridiem: false,
+                    hour12: false
+                }
+            });
+            calendar.render();
+        });
+    </script>
+{% endblock %}
